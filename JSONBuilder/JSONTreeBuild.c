@@ -8,13 +8,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "jsontree.h"
+/*#include "jsontree.h"
 #include "jsonparse.h"
-#include "json-ws.h"
+#include "json-ws.h"*/
 #include "io.h"
 #include "dirent.h" //POSIX wrapper for WIN32 directory APIs 
 
-static int
+/*static int
 accessPoints_get(struct jsontree_context *js_ctx)
 {
   const char *path = jsontree_path_name(js_ctx, js_ctx->depth - 1);
@@ -63,14 +63,14 @@ static void scramble ( scramble_data_t arr[], unsigned int n )
 }
 
 /*---------------------------------------------------------------------------*/
-static void
+/*static void
 json_copy_string(struct jsonparse_state *parser, char *string, int len)
 {
   jsonparse_next(parser);
   jsonparse_copy_value(parser, string, len);
 }
 /*---------------------------------------------------------------------------*/
-static int
+/*static int
 accessPoint_select(struct jsontree_context *js_ctx, struct jsonparse_state *parser)
 {
   int type;
@@ -110,7 +110,7 @@ static void stringify(struct jsontree_context *js_ctx, uint8_t *buf, uint8_t siz
 
 }
 /*---------------------------------------------------------------------------*/
-static int
+/*static int
 cfg_get(struct jsontree_context *js_ctx)
 {
   const char *path = jsontree_path_name(js_ctx, js_ctx->depth - 1);
@@ -424,40 +424,124 @@ JSONTREE_OBJECT(final_tree,
                 JSONTREE_PAIR("ServerCFG", &config_tree));
 /*----------------------------------------------------------------------------*/
 
-unsigned long garbagecollect[256];
+struct dirTreeNode_t{
+	char name[64];
+	unsigned type;
+	unsigned int numchildren;
+	void* children[20];
+};
 
-void recursivelistdir(const char *name, int indent)
+typedef struct dirTreeNode_t dirTreeNode;
+
+void* garbagecollect[256];
+
+void* jsongarbagecollect[256];
+
+static char path[2048];
+
+static unsigned int gci = 0;
+static unsigned int jgci = 0;
+
+int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode) //Recursively list directories and sub-directories
 {
     DIR *dir;
     struct dirent *entry;
-	unsigned int i = 0;
+	dirTreeNode * tempChildNode;
+	
+	volatile unsigned int tk = 0;
+	
+	for(tk=0;tk<10;tk++)
+	{
+		tempNode->children[tk] = NULL;
+	}
+	
+	tk=0;
 
     if (!(dir = opendir(name)))
-        return;
+        return (-1);
 
     while ((entry = readdir(dir)) != NULL) {
+		
         if (entry->type == _A_SUBDIR) {
-            char path[1024];
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
                 continue;
+			
+			tempChildNode = (dirTreeNode *)malloc(sizeof(dirTreeNode));
+		
+			memset(tempChildNode,0,sizeof(dirTreeNode));
+				
+			strcpy(tempChildNode->name,entry->d_name);
+		
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
-            printf("%*s[%s]\n", indent, "", entry->d_name);
-            recursivelistdir(path, indent + 2);
-        } else if (entry->type == _A_NORMAL){
-            printf("%*s- %s\n", indent, "", entry->d_name);
+			tempChildNode->type = _A_SUBDIR;
+			garbagecollect[gci++] = (void *)(tempChildNode);
+			tempNode->children[tk++] = (void *)tempChildNode;
+            //printf("%*s[%s]\n", indent, "", entry->d_name);
+            if(recursivelistdir(path, indent + 2,tempChildNode)<0)
+				break;
+        } else if ((entry->type == _A_NORMAL) || (entry->type == _A_ARCH)){
+			
+			tempChildNode = (dirTreeNode *)malloc(sizeof(dirTreeNode));
+		
+			memset(tempChildNode,0,sizeof(dirTreeNode));
+				
+			strcpy(tempChildNode->name,entry->d_name);
+			
+            //printf("%*s- %s\n", indent, "", entry->d_name);			
+			tempChildNode->type = _A_ARCH;	
+
+			garbagecollect[gci++] = (void *)(tempChildNode);
+			
+			tempNode->children[tk++] = (void *)tempChildNode;
         }
     }
-    closedir(dir);
+	closedir(dir);
+	if(tk>=20)
+	{
+		for(tk=0;tk<gci;tk++)
+		{
+			if(garbagecollect[tk] != NULL)
+			{
+				free(garbagecollect[tk]);
+				garbagecollect[tk] = NULL;
+			}
+		}
+		return (-1);
+	}else{
+		tempNode->numchildren = (tk+1);
+		return 0;
+	}
 }
 
-int constructJSONDirTree(int argc, char *argv)
+int main(int argc, char **argv)
 {
+	dirTreeNode * dirTreeRoot;
 	
-	memset(garbagecollect,0,256*sizeof(unsigned long));
+	memset(garbagecollect,0,256*sizeof(void*));
 	
-	recursivelistdir(".", 0);
+	dirTreeRoot = (dirTreeNode *)malloc(sizeof(dirTreeNode));
 	
-	json_ws_init(&final_tree);
+	memset(dirTreeRoot,0,sizeof(dirTreeNode));
+	
+	strcpy(dirTreeRoot->name,".");
+	
+	dirTreeRoot->type = _A_SUBDIR;
+	
+	garbagecollect[gci++] = (void *)(dirTreeRoot);
+	
+	recursivelistdir(".", 0,dirTreeRoot);
+	
+	volatile unsigned int k;
+	
+	for(k=0;k<gci;k++)
+	{
+		if(garbagecollect[k] != NULL){
+			free(garbagecollect[k]);
+			garbagecollect[k] = NULL;
+		}
+	}
+	
+	/*json_ws_init(&final_tree);
 
         if(bConnected){
 			if((fdsReady > 0) && (FD_ISSET(newsockfd, &readfds)))
@@ -504,5 +588,6 @@ int constructJSONDirTree(int argc, char *argv)
 					bConnected = false;
 				}
 			}
-        }
+        }*/
+	return 0;
 }

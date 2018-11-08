@@ -1,0 +1,32 @@
+# Project: Project1
+# Makefile created by Dev-C++ 5.4.0
+
+CPP      = g++.exe -D__DEBUG__
+CC       = gcc.exe -D__DEBUG__
+WINDRES  = windres.exe
+OBJ      = JSONTreeBuild.o dirent.o $(RES)
+LINKOBJ  = JSONTreeBuild.o dirent.o $(RES)
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"."
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"."
+BIN      = Project1.exe
+CXXFLAGS = $(CXXINCS)  -g3
+CFLAGS   = $(INCS)  -g3
+RM       = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+JSONTreeBuild.o: JSONTreeBuild.c
+	$(CC) -c JSONTreeBuild.c -o JSONTreeBuild.o $(CFLAGS)
+
+dirent.o: dirent.c
+	$(CC) -c dirent.c -o dirent.o $(CFLAGS)
