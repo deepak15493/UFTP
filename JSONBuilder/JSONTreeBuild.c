@@ -1,5 +1,5 @@
 /******************************************************************************
-* FILENAME      : main.cpp                                                      
+* FILENAME      : JSONTreeBuild                                                     
 *									      
 * DESCRIPTION   : Device server main module, which handles different events    
 *                 from different modules.				      	
@@ -11,7 +11,8 @@
 #include "jsontree.h"
 #include "jsonparse.h"
 #include "json-ws.h"
-#include "httpd-ws.h"
+#include "io.h"
+#include "dirent.h" //POSIX wrapper for WIN32 directory APIs 
 
 static int
 accessPoints_get(struct jsontree_context *js_ctx)
@@ -423,16 +424,40 @@ JSONTREE_OBJECT(final_tree,
                 JSONTREE_PAIR("ServerCFG", &config_tree));
 /*----------------------------------------------------------------------------*/
 
-int constructJSONDirTree(int argc, char **argv)
+unsigned long garbagecollect[256];
+
+void recursivelistdir(const char *name, int indent)
 {
-	json_ws_init(&final_tree);
-  
-	httpd_ws_init(&pHTTPD_data);
+    DIR *dir;
+    struct dirent *entry;
+	unsigned int i = 0;
+
+    if (!(dir = opendir(name)))
+        return;
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->type == _A_SUBDIR) {
+            char path[1024];
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+            snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+            printf("%*s[%s]\n", indent, "", entry->d_name);
+            recursivelistdir(path, indent + 2);
+        } else if (entry->type == _A_NORMAL){
+            printf("%*s- %s\n", indent, "", entry->d_name);
+        }
+    }
+    closedir(dir);
+}
+
+int constructJSONDirTree(int argc, char *argv)
+{
 	
-	pHTTPD_data->inputbuf = (char*) (&jsonInput[0]);
-	pHTTPD_data->outbuf = (char*) (&httpOutput[0]);
-	pHTTPD_data->checkbuf = (char*)(&httpInput[0]);
-	pHTTPD_data->filename = (char*)(&filename_buf[0]);
+	memset(garbagecollect,0,256*sizeof(unsigned long));
+	
+	recursivelistdir(".", 0);
+	
+	json_ws_init(&final_tree);
 
         if(bConnected){
 			if((fdsReady > 0) && (FD_ISSET(newsockfd, &readfds)))

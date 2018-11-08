@@ -93,7 +93,7 @@ struct jsontree_callback {
 };
 
 struct jsontree_pair {
-  const char *name;
+  char name[64]; //maximum number of characters
   struct jsontree_value *value;
 };
 
