@@ -40,7 +40,6 @@
 #ifndef JSONTREE_H_
 #define JSONTREE_H_
 
-#include "contiki-conf.h"
 #include "json.h"
 
 #ifdef JSONTREE_CONF_MAX_DEPTH
@@ -71,7 +70,7 @@ struct jsontree_value {
 
 struct jsontree_string {
   uint8_t type;
-  const char *value;
+  char* value;//maximum number of characters for path
 };
 
 struct jsontree_uint {

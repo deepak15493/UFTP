@@ -1,13 +1,13 @@
 [Editor_0]
-CursorCol=5
-CursorRow=507
-TopLine=524
+CursorCol=1
+CursorRow=594
+TopLine=1
 LeftChar=1
 Open=1
 Top=1
 [Editors]
 Focused=0
-Order=0,1,2
+Order=0,1,-1
 [Editor_1]
 Open=1
 Top=0

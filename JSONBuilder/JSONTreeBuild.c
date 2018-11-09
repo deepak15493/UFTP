@@ -8,9 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/*#include "jsontree.h"
-#include "jsonparse.h"
-#include "json-ws.h"*/
+#include <stdint.h>
+#include "jsontree.h"
+//#include "jsonparse.h"
+//#include "json-ws.h"
 #include "io.h"
 #include "dirent.h" //POSIX wrapper for WIN32 directory APIs 
 
@@ -435,12 +436,14 @@ typedef struct dirTreeNode_t dirTreeNode;
 
 void* garbagecollect[256];
 
-void* jsongarbagecollect[256];
+static struct jsontree_object final_tree;
+
+void* jsongarbagecollect[512];
 
 static char path[2048];
 
-static unsigned int gci = 0;
-static unsigned int jgci = 0;
+volatile static unsigned int gci = 0;
+volatile static unsigned int jsongci = 0;
 
 int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode) //Recursively list directories and sub-directories
 {
@@ -496,7 +499,7 @@ int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode) //Recu
         }
     }
 	closedir(dir);
-	if(tk>=20)
+	if(tk>20)
 	{
 		for(tk=0;tk<gci;tk++)
 		{
@@ -508,9 +511,64 @@ int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode) //Recu
 		}
 		return (-1);
 	}else{
-		tempNode->numchildren = (tk+1);
+		tempNode->numchildren = (tk);
 		return 0;
 	}
+}
+
+struct jsontree_value *
+convertToJSONTree(dirTreeNode * tempNode)
+{
+	volatile unsigned int k = 0; 
+	volatile unsigned int j = 0;
+
+	struct jsontree_object* dirobj = (struct jsontree_object*) malloc(sizeof(struct jsontree_object)); 
+	memset(dirobj,0,sizeof(struct jsontree_object));
+	jsongarbagecollect[jsongci] = (void *)(dirobj);
+	jsongci+=1;
+	dirobj->type = JSON_TYPE_OBJECT;
+	
+	strcpy(path + strlen(path),tempNode->name);
+	
+	if(tempNode->numchildren){
+		dirobj->count = tempNode->numchildren;
+		struct jsontree_pair* pairsarray =(struct jsontree_pair*) malloc(tempNode->numchildren * sizeof(struct jsontree_pair)); 
+		memset(pairsarray,0,tempNode->numchildren * sizeof(struct jsontree_pair));
+		dirobj->pairs = pairsarray;
+		jsongarbagecollect[jsongci] = (void *)(pairsarray);
+		jsongci+=1;
+		for(k=0;k<tempNode->numchildren;k++)
+		{
+			if(tempNode->children[k] != NULL)
+			{
+				dirTreeNode *node = (dirTreeNode *)tempNode->children[k];
+				if(node->type == _A_ARCH){ //Normal file
+					struct jsontree_pair* filepair = (struct jsontree_pair*)(&(pairsarray[j++])); 
+					strcpy(filepair->name,node->name);
+					struct jsontree_string* filestr = (struct jsontree_string*) malloc(sizeof(struct jsontree_string)); 
+					memset(filestr,0,sizeof(struct jsontree_string));
+					jsongarbagecollect[jsongci] = (void *)(filestr);
+					jsongci+=1;
+					filestr->type = JSON_TYPE_STRING;
+					unsigned int filestrlen = strlen(&path[0])+2+strlen(node->name);
+					filestr->value = (char*)malloc(filestrlen);
+					memset(filestr->value,0,filestrlen);
+					jsongarbagecollect[jsongci] = (void *)(filestr->value);
+					jsongci+=1;
+					strcpy(filestr->value,&path[0]);
+					strcpy(filestr->value + strlen(filestr->value),"/");
+					strcpy(filestr->value + strlen(filestr->value),node->name);	
+					filepair->value = (struct jsontree_value *)filestr;
+				}else if(node->type == _A_SUBDIR){//Subdirectory
+					struct jsontree_pair* subdirpair = (struct jsontree_pair*)(&(pairsarray[j++])); 
+					strcpy(subdirpair->name,node->name);
+					strcpy(path + strlen(path),"/");
+					subdirpair->value = convertToJSONTree(node);
+				}
+			}
+		}
+	}
+	return (struct jsontree_value *)(dirobj);
 }
 
 int main(int argc, char **argv)
@@ -531,6 +589,22 @@ int main(int argc, char **argv)
 	
 	recursivelistdir(".", 0,dirTreeRoot);
 	
+	memset(path,0,sizeof(path));
+	
+	struct jsontree_pair* rootdirpair = (struct jsontree_pair*) malloc(sizeof(struct jsontree_pair)); 
+	memset(rootdirpair,0,sizeof(struct jsontree_pair));
+	jsongarbagecollect[jsongci] = (void *)(rootdirpair);
+	jsongci+=1;
+	strcpy(rootdirpair->name,dirTreeRoot->name);
+	
+	rootdirpair->value = convertToJSONTree(dirTreeRoot);
+	
+	memset(&final_tree,0,sizeof(struct jsontree_object));
+	
+	final_tree.type = JSON_TYPE_OBJECT;
+	final_tree.count = 1;
+	final_tree.pairs = rootdirpair;
+	
 	volatile unsigned int k;
 	
 	for(k=0;k<gci;k++)
@@ -538,6 +612,14 @@ int main(int argc, char **argv)
 		if(garbagecollect[k] != NULL){
 			free(garbagecollect[k]);
 			garbagecollect[k] = NULL;
+		}
+	}
+	
+	for(k=0;k<jsongci;k++)
+	{
+		if(jsongarbagecollect[k] != NULL){
+			free(jsongarbagecollect[k]);
+			jsongarbagecollect[k] = NULL;
 		}
 	}
 	
