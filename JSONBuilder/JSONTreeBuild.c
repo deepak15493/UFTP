@@ -667,7 +667,7 @@ json_putchar(int c)
 			{
 				temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
 			}
-			temp_len += (k - (jsonctx.index[jsonctx.depth - 1]+1) + 1); //Add commas and final flower bracket
+			temp_len += (k - (jsonctx.index[jsonctx.depth - 1]+1) + 2); //Add commas and final two flower brackets
 			if(outbuf_pos + temp_len > 16383){
 				jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
 				outbuf_pos+=1;
@@ -684,7 +684,7 @@ json_putchar(int c)
   return 0;
 }
 
-void* fetchJSONBuffer(char* path){
+void* fetchJSONBuffer(char* filepath){
 	struct jsontree_value *v;
 	
 	memset(jsonReturnBuf,0,sizeof(jsonReturnBuf));
@@ -693,10 +693,10 @@ void* fetchJSONBuffer(char* path){
 	jsonctx.values[0] = v;
 	jsontree_reset(&jsonctx);
 
-	if(path[1] == '\0') {
+	if(filepath[1] == '\0') {
 		/* Default page: show full JSON tree. */
 	} else {
-		v = find_json_path(&jsonctx, &path[1]);
+		v = find_json_path(&jsonctx, &filepath[0]);
 	}
 	if(v != NULL) {
 		jsonctx.path = jsonctx.depth;
@@ -708,7 +708,7 @@ void* fetchJSONBuffer(char* path){
 	return (void *)(jsonReturnBuf);
 }
 
-int main(int argc, char **argv)
+int JSONTreeBuild()
 {
 	dirTreeNode * dirTreeRoot;
 	
@@ -724,9 +724,8 @@ int main(int argc, char **argv)
 	
 	garbagecollect[gci++] = (void *)(dirTreeRoot);
 	
-	recursivelistdir(".", 0,dirTreeRoot);
-	
-	memset(path,0,sizeof(path));
+	if(recursivelistdir(".", 0,dirTreeRoot) == -1)
+		return -1;
 	
 	struct jsontree_pair* rootdirpair = (struct jsontree_pair*) malloc(sizeof(struct jsontree_pair)); 
 	memset(rootdirpair,0,sizeof(struct jsontree_pair));
@@ -751,8 +750,6 @@ int main(int argc, char **argv)
 			garbagecollect[k] = NULL;
 		}
 	}
-	fetchJSONBuffer(".");
-	purgeJSONTree();
 
 	return 0;
 }
