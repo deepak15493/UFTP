@@ -533,7 +533,7 @@ convertToJSONTree(dirTreeNode * tempNode)
 	jsongci+=1;
 	dirobj->type = JSON_TYPE_OBJECT;
 	
-	strcpy(path + strlen(path),tempNode->name);
+	//strcpy(path + strlen(path),tempNode->name);
 	
 	if(tempNode->numchildren){
 		dirobj->count = tempNode->numchildren;
@@ -549,25 +549,31 @@ convertToJSONTree(dirTreeNode * tempNode)
 				dirTreeNode *node = (dirTreeNode *)tempNode->children[k];
 				if(node->type == _A_ARCH){ //Normal file
 					struct jsontree_pair* filepair = (struct jsontree_pair*)(&(pairsarray[j++])); 
-					strcpy(filepair->name,node->name);
+					strcpy(filepair->name,"F");
 					struct jsontree_string* filestr = (struct jsontree_string*) malloc(sizeof(struct jsontree_string)); 
 					memset(filestr,0,sizeof(struct jsontree_string));
 					jsongarbagecollect[jsongci] = (void *)(filestr);
 					jsongci+=1;
 					filestr->type = JSON_TYPE_STRING;
-					unsigned int filestrlen = strlen(&path[0])+2+strlen(node->name);
+					unsigned int filestrlen = strlen(node->name) + 1;
 					filestr->value = (char*)malloc(filestrlen);
 					memset(filestr->value,0,filestrlen);
 					jsongarbagecollect[jsongci] = (void *)(filestr->value);
 					jsongci+=1;
-					strcpy(filestr->value,&path[0]);
-					strcpy(filestr->value + strlen(filestr->value),"/");
-					strcpy(filestr->value + strlen(filestr->value),node->name);	
+					strcpy(filestr->value,node->name);	
 					filepair->value = (struct jsontree_value *)filestr;
-				}else if(node->type == _A_SUBDIR){//Subdirectory
+				}
+			}
+		}
+		for(k=0;k<tempNode->numchildren;k++)
+		{
+			if(tempNode->children[k] != NULL)
+			{
+				dirTreeNode *node = (dirTreeNode *)tempNode->children[k];
+				if(node->type == _A_SUBDIR){//Subdirectory
 					struct jsontree_pair* subdirpair = (struct jsontree_pair*)(&(pairsarray[j++])); 
 					strcpy(subdirpair->name,node->name);
-					strcpy(path + strlen(path),"/");
+					//strcpy(path + strlen(path),"/");
 					subdirpair->value = convertToJSONTree(node);
 				}
 			}
@@ -745,15 +751,8 @@ int main(int argc, char **argv)
 			garbagecollect[k] = NULL;
 		}
 	}
-	//fetchJSONBuffer(".");
-	//purgeJSONTree();
-	for(k=0;k<jsongci;k++)
-	{
-		if(jsongarbagecollect[k] != NULL){
-			free(jsongarbagecollect[k]);
-			jsongarbagecollect[k] = NULL;
-		}
-	}
+	fetchJSONBuffer(".");
+	purgeJSONTree();
 
 	return 0;
 }
