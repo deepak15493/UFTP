@@ -36,8 +36,7 @@
  *         Niclas Finne <nfi@sics.se>
  *         Joakim Eriksson <joakime@sics.se>
  */
-
-#include "contiki.h"
+#include <stdint.h> 
 #include "jsontree.h"
 #include "jsonparse.h"
 #include <string.h>
@@ -153,7 +152,11 @@ jsontree_print_next(struct jsontree_context *js_ctx)
 
     index = js_ctx->index[js_ctx->depth];
     if(index == 0) {
-      js_ctx->putchar(v->type);
+      if(js_ctx->putchar(v->type) == (-1))
+	  {
+		  //Don't go ahead with putting the sub-directory content in buffer. Back up one level
+		  break;
+	  }
 #if JSONTREE_PRETTY
       js_ctx->putchar('\n');
 #endif

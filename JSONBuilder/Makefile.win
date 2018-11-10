@@ -4,8 +4,8 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = JSONTreeBuild.o dirent.o $(RES)
-LINKOBJ  = JSONTreeBuild.o dirent.o $(RES)
+OBJ      = JSONTreeBuild.o dirent.o jsontree.o $(RES)
+LINKOBJ  = JSONTreeBuild.o dirent.o jsontree.o $(RES)
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"."
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"."
@@ -30,3 +30,6 @@ JSONTreeBuild.o: JSONTreeBuild.c
 
 dirent.o: dirent.c
 	$(CC) -c dirent.c -o dirent.o $(CFLAGS)
+
+jsontree.o: jsontree.c
+	$(CC) -c jsontree.c -o jsontree.o $(CFLAGS)
