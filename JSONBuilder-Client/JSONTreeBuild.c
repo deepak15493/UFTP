@@ -428,7 +428,7 @@ struct dirTreeNode_t{
 	char name[64];
 	unsigned type;
 	unsigned int numchildren;
-	void* children[20];
+	void* children[21];
 };
 
 typedef struct dirTreeNode_t dirTreeNode;
@@ -484,6 +484,8 @@ int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode) //Recu
 			tempChildNode->type = _A_SUBDIR;
 			garbagecollect[gci++] = (void *)(tempChildNode);
 			tempNode->children[tk++] = (void *)tempChildNode;
+			if(tk > 20)
+				break;
             //printf("%*s[%s]\n", indent, "", entry->d_name);
             if(recursivelistdir(path, indent + 2,tempChildNode)<0)
 				break;
@@ -501,6 +503,9 @@ int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode) //Recu
 			garbagecollect[gci++] = (void *)(tempChildNode);
 			
 			tempNode->children[tk++] = (void *)tempChildNode;
+			
+			if(tk > 20)
+				break;
         }
     }
 	closedir(dir);
@@ -673,7 +678,40 @@ json_putchar(int c)
 				outbuf_pos+=1;
 				return -1;
 			}
-		}else if((jsonctx.depth-jsonctx.path)>2){
+		}else if((jsonctx.depth-jsonctx.path)==3){
+			struct jsontree_object* v = (struct jsontree_object* )jsonctx.values[jsonctx.depth];
+			volatile unsigned int temp_len = 0;
+			volatile unsigned int k = 0;
+			for(k=0;k<v->count;k++)
+			{
+				struct jsontree_value* ov = v->pairs[k].value;
+				temp_len += (3 + strlen(v->pairs[k].name)); //For double quotes and colon add 3, plus the name of the pair
+				if(ov->type == JSON_TYPE_STRING){ //Is a normal file
+					temp_len += (2 + strlen(((struct jsontree_string *)ov)->value)); //Add double quotes size and string length of the name of file
+				}else if(ov->type == JSON_TYPE_OBJECT)
+				{//Is a sub-directory
+					temp_len += 2; //2 added for the flower brackets
+				}
+			}
+			temp_len += (v->count); //Commas plus flower brace in the end
+			v = (struct jsontree_object* )jsonctx.values[jsonctx.depth - 1];
+			for(k=jsonctx.index[jsonctx.depth - 1]+1;k<v->count;k++)
+			{
+				temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
+			}
+			temp_len += (k - (jsonctx.index[jsonctx.depth - 1]+1) + 2); //Add commas and final two flower brackets
+			v = (struct jsontree_object* )jsonctx.values[jsonctx.depth - 2];
+			for(k=jsonctx.index[jsonctx.depth - 2]+1;k<v->count;k++)
+			{
+				temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
+			}
+			temp_len += (k - (jsonctx.index[jsonctx.depth - 2]+1) + 2); //Add commas and final two flower brackets
+			if(outbuf_pos + temp_len > 16383){
+				jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
+				outbuf_pos+=1;
+				return -1;
+			}
+		}else if((jsonctx.depth-jsonctx.path)>3){
 				jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
 				outbuf_pos+=1;
 				return -1;
@@ -708,7 +746,25 @@ void* fetchJSONBuffer(char* filepath){
 	return (void *)(jsonReturnBuf);
 }
 
-int JSONTreeBuild()
+void purgeDirTree()
+{
+	volatile unsigned int k;
+	
+	for(k=0;k<gci;k++)
+	{
+		if(garbagecollect[k] != NULL){
+			free(garbagecollect[k]);
+			garbagecollect[k] = NULL;
+		}
+	}
+}
+	
+int JSONTreeInterpret(void* dirpath,void* JSONTreeBuf)
+{
+	
+}
+
+int DirTreeBuild()
 {
 	dirTreeNode * dirTreeRoot;
 	
@@ -723,33 +779,6 @@ int JSONTreeBuild()
 	dirTreeRoot->type = _A_SUBDIR;
 	
 	garbagecollect[gci++] = (void *)(dirTreeRoot);
-	
-	if(recursivelistdir(".", 0,dirTreeRoot) == -1)
-		return -1;
-	
-	struct jsontree_pair* rootdirpair = (struct jsontree_pair*) malloc(sizeof(struct jsontree_pair)); 
-	memset(rootdirpair,0,sizeof(struct jsontree_pair));
-	jsongarbagecollect[jsongci] = (void *)(rootdirpair);
-	jsongci+=1;
-	strcpy(rootdirpair->name,dirTreeRoot->name);
-	
-	rootdirpair->value = convertToJSONTree(dirTreeRoot);
-	
-	memset(&final_tree,0,sizeof(struct jsontree_object));
-	
-	final_tree.type = JSON_TYPE_OBJECT;
-	final_tree.count = 1;
-	final_tree.pairs = rootdirpair;
-	
-	volatile unsigned int k;
-	
-	for(k=0;k<gci;k++)
-	{
-		if(garbagecollect[k] != NULL){
-			free(garbagecollect[k]);
-			garbagecollect[k] = NULL;
-		}
-	}
 
 	return 0;
 }
