@@ -43,7 +43,7 @@ static int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode)
 	
 	volatile unsigned int tk = 0;
 	
-	for(tk=0;tk<10;tk++)
+	for(tk=0;tk<20;tk++)
 	{
 		tempNode->children[tk] = NULL;
 	}
@@ -68,7 +68,8 @@ static int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode)
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
 			tempChildNode->type = _A_SUBDIR;
 			garbagecollect[gci++] = (void *)(tempChildNode);
-			tempNode->children[tk++] = (void *)tempChildNode;
+			tempNode->children[tk] = (void *)tempChildNode;
+			tk+=1;
 			if(tk > 20)
 				break;
             //printf("%*s[%s]\n", indent, "", entry->d_name);
@@ -87,7 +88,8 @@ static int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode)
 
 			garbagecollect[gci++] = (void *)(tempChildNode);
 			
-			tempNode->children[tk++] = (void *)tempChildNode;
+			tempNode->children[tk] = (void *)tempChildNode;
+			tk+=1;
 			
 			if(tk > 20)
 				break;
@@ -138,7 +140,8 @@ convertToJSONTree(dirTreeNode * tempNode)
 			{
 				dirTreeNode *node = (dirTreeNode *)tempNode->children[k];
 				if(node->type == _A_ARCH){ //Normal file
-					struct jsontree_pair* filepair = (struct jsontree_pair*)(&(pairsarray[j++])); 
+					struct jsontree_pair* filepair = (struct jsontree_pair*)(&(pairsarray[j])); 
+					j+=1;
 					strcpy(filepair->name,"F");
 					struct jsontree_string* filestr = (struct jsontree_string*) malloc(sizeof(struct jsontree_string)); 
 					memset(filestr,0,sizeof(struct jsontree_string));
@@ -161,7 +164,8 @@ convertToJSONTree(dirTreeNode * tempNode)
 			{
 				dirTreeNode *node = (dirTreeNode *)tempNode->children[k];
 				if(node->type == _A_SUBDIR){//Subdirectory
-					struct jsontree_pair* subdirpair = (struct jsontree_pair*)(&(pairsarray[j++])); 
+					struct jsontree_pair* subdirpair = (struct jsontree_pair*)(&(pairsarray[j])); 
+					j+=1;
 					strcpy(subdirpair->name,node->name);
 					//strcpy(path + strlen(path),"/");
 					subdirpair->value = convertToJSONTree(node);

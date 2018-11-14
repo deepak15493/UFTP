@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000001000000
-UnitCount=3
+UnitCount=2
 
 [VersionInfo]
 Major=1
@@ -60,8 +60,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit2]
-FileName=dirent.c
+[Unit3]
+FileName=jsontree.c
 CompileCpp=0
 Folder=Project1
 Compile=1
@@ -70,8 +70,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit3]
-FileName=jsontree.c
+[Unit2]
+FileName=jsonparse.c
 CompileCpp=0
 Folder=Project1
 Compile=1
