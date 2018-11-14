@@ -71,10 +71,11 @@ dirTreeNode *GetNodeAddr(char* dirpath){
 				break;
 			}
 			tempParentNode = tempNode;
+			tempNode = tempParentNode->children[0];
 			tk = 0;
 		}else{
-			tempNode = tempParentNode->children[tk]; //Check next child
 			tk+=1;
+			tempNode = tempParentNode->children[tk]; //Check next child
 		}
 	}while((offset<len) && (tk < 20) && (tempNode));
 	
@@ -92,7 +93,8 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 			dirTreeNode *newNode;
 			newNode = (dirTreeNode *)malloc(sizeof(dirTreeNode));
 			memset(newNode,0,sizeof(dirTreeNode));
-			garbagecollect[gci++] = (void*)newNode;
+			garbagecollect[gci] = (void*)newNode;
+			gci+=1;
 			int len = 0;
 			while(cJSONTreeBuf[js.vstart + len] != '"'){
 				len++;
@@ -111,7 +113,6 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 					tk+=1;
 				};
 				tempParent->children[tk] = newNode;
-				tk+=1;
 				tempParent->numchildren +=1;
 			}else {//This is a sub-directory
 				newNode->type = _A_SUBDIR;
@@ -120,9 +121,8 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 					tk+=1;
 				};
 				tempParent->children[tk] = newNode;
-				tk+=1;
 				tempParent->numchildren +=1;
-				if(cJSONTreeBuf[js.vstart + 1] == '}'){
+				if(cJSONTreeBuf[js.vstart + js.vlen + 3] != '"'){
 					continue;
 				}
 				volatile unsigned int tempLen = strlen(dirpath);
@@ -131,14 +131,31 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 				recursiveInterpret(dirpath,JSONTreeBuf);
 				*((char*)(dirpath + tempLen)) = '\0';
 			}
+		} else if(type == '}'){
+			return 0;
 		}
 	}
+	return 0;
 }
 	
 int JSONTreeInterpret(void* dirpath,void* JSONTreeBuf)
 {
 	jsonparse_setup(&js, (const char *)JSONTreeBuf, strlen((const char *)JSONTreeBuf));
 	recursiveInterpret(dirpath,JSONTreeBuf);
+}
+
+void printDirTree(dirTreeNode *printtree,int tab){
+	volatile int i;
+	for(i=0;i<20;i++){
+		if(printtree->children[i]){
+			if(((dirTreeNode*)(printtree->children[i]))->type == _A_ARCH){
+				printf("%*s- %s\n", tab, "", ((dirTreeNode*)(printtree->children[i]))->name);
+			}else{
+				printf("%*s[%s]\n", tab, "", ((dirTreeNode*)(printtree->children[i]))->name);
+				printDirTree(printtree->children[i],tab+1);
+			}
+		}
+	}
 }
 
 int main()
@@ -154,9 +171,13 @@ int main()
 	
 	dirTreeRoot->type = _A_SUBDIR;
 	
-	garbagecollect[gci++] = (void *)(dirTreeRoot);
+	garbagecollect[gci] = (void *)(dirTreeRoot);
+	
+	gci+=1;
 	
 	JSONTreeInterpret((void*)(&rqpath[0]),(void*)(JSONBuf));
+	
+	printDirTree(dirTreeRoot,0);
 	
 	purgeDirTree();
 
