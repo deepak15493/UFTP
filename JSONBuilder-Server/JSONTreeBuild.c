@@ -192,8 +192,7 @@ void purgeJSONTree(){
 	}
 }
 
-//void* JSONTreeBuild()
-int main()
+void* JSONTreeBuild()
 {
 	
 	memset(garbagecollect,0,256*sizeof(void*));
@@ -210,8 +209,7 @@ int main()
 	
 	if(recursivelistdir(".", 0,dirTreeRoot) == -1)
 	{
-		//return NULL;
-		return -1;
+		return NULL;
 	}
 	
 	struct jsontree_pair* rootdirpair = (struct jsontree_pair*) malloc(sizeof(struct jsontree_pair)); 
@@ -237,15 +235,6 @@ int main()
 			garbagecollect[k] = NULL;
 		}
 	}
-	
-	char* printfBuf;
-	
-	printfBuf = (char*)(fetchJSONBuffer("./",&final_tree));
-	
-	printf("%s",printfBuf);
-	
-	purgeJSONTree();
 
-	//return (void*)(&final_tree);
-	return 0;
+	return (void*)(&final_tree);
 }

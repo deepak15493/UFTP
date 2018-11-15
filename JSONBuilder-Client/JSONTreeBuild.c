@@ -106,9 +106,11 @@ void* getCommand(void* filename){//Only check if the filename is valid. The Pyth
 	}else{
 		for(i=0;i<20;i++)
 		{
-			if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
-			{
-				return (void*)(rqpath);
+			if(curTreeRoot->children[i]){
+				if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
+				{
+					return (void*)(rqpath);
+				}
 			}
 		}
 	}
@@ -243,15 +245,17 @@ int changeDir(void* subDir){ //Call this from the Python file when the user inpu
 		}else{
 			for(i=0;i<20;i++)
 			{
-				if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
-				{
-					strcat(rqpath,"/");
-					strcat(rqpath,temp);
-					curTreeRoot = (dirTreeNode*)(curTreeRoot->children[i]);
-					if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
-						return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
+				if(curTreeRoot->children[i]){
+					if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
+					{
+						strcat(rqpath,"/");
+						strcat(rqpath,temp);
+						curTreeRoot = (dirTreeNode*)(curTreeRoot->children[i]);
+						if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
+							return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
+						}
+						break;
 					}
-					break;
 				}
 			}
 		}
