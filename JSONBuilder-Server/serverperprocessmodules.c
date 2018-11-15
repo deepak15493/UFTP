@@ -72,10 +72,11 @@ json_putchar(int c)
 	jsonReturnBuf[outbuf_pos] = c;
 	outbuf_pos+=1;
 	if((c == '{')){
-		if((jsonctx.depth-jsonctx.path)==2){ //Put immediate sub-directories in the buffer, but not deeper
+		if((jsonctx.depth-jsonctx.path)>=1){
 			struct jsontree_object* v = (struct jsontree_object* )jsonctx.values[jsonctx.depth];
 			volatile unsigned int temp_len = 0;
 			volatile unsigned int k = 0;
+			volatile int tdepth = 0;
 			for(k=0;k<v->count;k++)
 			{
 				struct jsontree_value* ov = v->pairs[k].value;
@@ -87,55 +88,54 @@ json_putchar(int c)
 					temp_len += 2; //2 added for the flower brackets
 				}
 			}
-			temp_len += (v->count); //Commas plus flower brace in the end
-			v = (struct jsontree_object* )jsonctx.values[jsonctx.depth - 1];
-			for(k=jsonctx.index[jsonctx.depth - 1]+1;k<v->count;k++)
-			{
-				temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
-			}
-			temp_len += (k - (jsonctx.index[jsonctx.depth - 1]+1) + 2); //Add commas and final two flower brackets
-			if(outbuf_pos + temp_len > 16383){
-				jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
-				outbuf_pos+=1;
-				return -1;
-			}
-		}else if((jsonctx.depth-jsonctx.path)==3){
-			struct jsontree_object* v = (struct jsontree_object* )jsonctx.values[jsonctx.depth];
-			volatile unsigned int temp_len = 0;
-			volatile unsigned int k = 0;
-			for(k=0;k<v->count;k++)
-			{
-				struct jsontree_value* ov = v->pairs[k].value;
-				temp_len += (3 + strlen(v->pairs[k].name)); //For double quotes and colon add 3, plus the name of the pair
-				if(ov->type == JSON_TYPE_STRING){ //Is a normal file
-					temp_len += (2 + strlen(((struct jsontree_string *)ov)->value)); //Add double quotes size and string length of the name of file
-				}else if(ov->type == JSON_TYPE_OBJECT)
-				{//Is a sub-directory
-					temp_len += 2; //2 added for the flower brackets
+			temp_len += (v->count - 1); //Commas 
+			tdepth = jsonctx.depth - jsonctx.path;
+			do{
+				v = (struct jsontree_object* )jsonctx.values[(tdepth + jsonctx.path) - 1];
+				for(k=jsonctx.index[(tdepth + jsonctx.path) - 1]+1;k<v->count;k++)
+				{
+					temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
 				}
-			}
-			temp_len += (v->count); //Commas plus flower brace in the end
-			v = (struct jsontree_object* )jsonctx.values[jsonctx.depth - 1];
-			for(k=jsonctx.index[jsonctx.depth - 1]+1;k<v->count;k++)
-			{
-				temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
-			}
-			temp_len += (k - (jsonctx.index[jsonctx.depth - 1]+1) + 2); //Add commas and final two flower brackets
-			v = (struct jsontree_object* )jsonctx.values[jsonctx.depth - 2];
-			for(k=jsonctx.index[jsonctx.depth - 2]+1;k<v->count;k++)
-			{
-				temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
-			}
-			temp_len += (k - (jsonctx.index[jsonctx.depth - 2]+1) + 2); //Add commas and final two flower brackets
-			if(outbuf_pos + temp_len > 16383){
+				temp_len += (k - (jsonctx.index[(tdepth + jsonctx.path) - 1])); //Add commas and final one flower brackets
+				tdepth--;
+			}while(tdepth > 0);
+			
+			if(outbuf_pos + temp_len > 16383){//Putting the entire subdir content into the buffer would exceed our length limit.
+				temp_len = 1; //Assume we're writing } to the buffer instead of the contents
+				tdepth = jsonctx.depth - jsonctx.path;
+				do{
+					v = (struct jsontree_object* )jsonctx.values[(tdepth + jsonctx.path) - 1];
+					for(k=jsonctx.index[(tdepth + jsonctx.path) - 1]+1;k<v->count;k++)
+					{
+						temp_len += (5 + strlen(v->pairs[k].name)); //For double quotes, empty flower braces and colon add 5, plus the name of the object for subdir
+					}
+					temp_len += (k - (jsonctx.index[(tdepth + jsonctx.path) - 1])); //Add commas and final one flower brackets
+					tdepth--;
+				}while(tdepth > 0);
+				if(outbuf_pos + temp_len > 16383){
+					//Even putting an empty subdir into buffer is causing it to overflow. Just stop putting the parent subdir itself
+					volatile unsigned int j = 0;
+					volatile int breakNow = 0;
+					jsonReturnBuf[outbuf_pos-1] = 0; 
+					for(j=outbuf_pos-2;j>0;j--){
+						if(jsonReturnBuf[j]=='{')
+						{
+							breakNow++;
+						}else if(jsonReturnBuf[j]=='}')
+						{
+							breakNow--;
+						}
+						if(breakNow==1)
+							break;
+						jsonReturnBuf[j] = 0; //Clear content till we reach the parent subdir label
+					}
+					outbuf_pos = j+1;
+					jsonctx.depth--; //Decrement one level
+				}
 				jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
 				outbuf_pos+=1;
 				return -1;
 			}
-		}else if((jsonctx.depth-jsonctx.path)>3){
-				jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
-				outbuf_pos+=1;
-				return -1;
 		}
 	}
 	return c;
