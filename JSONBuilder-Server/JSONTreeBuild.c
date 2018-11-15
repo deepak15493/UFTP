@@ -66,7 +66,7 @@ static int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode)
 			memset(tempChildNode,0,sizeof(dirTreeNode));
 				
 			strcpy(tempChildNode->name,entry->d_name);
-		
+			volatile unsigned int tempLen = strlen(path);
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
 			tempChildNode->type = _A_SUBDIR;
 			garbagecollect[gci++] = (void *)(tempChildNode);
@@ -77,6 +77,7 @@ static int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode)
             //printf("%*s[%s]\n", indent, "", entry->d_name);
             if(recursivelistdir(path, indent + 2,tempChildNode)<0)
 				break;
+			*((char*)(path + tempLen)) = '\0';
         } else if ((entry->type == _A_NORMAL) || (entry->type == _A_ARCH)){
         	
         	if(tempNode != dirTreeRoot){
