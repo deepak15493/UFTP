@@ -176,7 +176,7 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 int JSONTreeInterpret(void* JSONTreeBuf)
 {
 	jsonparse_setup(&js, (const char *)JSONTreeBuf, strlen((const char *)JSONTreeBuf));
-	recursiveInterpret((void*)(&rqpath[0]),JSONTreeBuf);
+	return recursiveInterpret((void*)(&rqpath[0]),JSONTreeBuf);
 }
 
 void printDirTree(dirTreeNode *printtree,int tab){
@@ -246,10 +246,10 @@ int changeDir(void* subDir){ //Call this from the Python file when the user inpu
 			for(i=0;i<20;i++)
 			{
 				if(curTreeRoot->children[i]){
-					if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
+					if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name))==0)
 					{
 						strcat(rqpath,"/");
-						strcat(rqpath,temp);
+						strncpy(rqpath,temp,strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name));
 						curTreeRoot = (dirTreeNode*)(curTreeRoot->children[i]);
 						if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
 							return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
