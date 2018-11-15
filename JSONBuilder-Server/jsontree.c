@@ -54,10 +54,12 @@ void
 jsontree_write_atom(const struct jsontree_context *js_ctx, const char *text)
 {
   if(text == NULL) {
-    js_ctx->putchar('0');
+    if(js_ctx->putchar('0') == -1)
+    	return;
   } else {
     while(*text != '\0') {
-      js_ctx->putchar(*text++);
+      if(js_ctx->putchar(*text++)  == -1)
+      	return;
     }
   }
 }
@@ -65,16 +67,20 @@ jsontree_write_atom(const struct jsontree_context *js_ctx, const char *text)
 void
 jsontree_write_string(const struct jsontree_context *js_ctx, const char *text)
 {
-  js_ctx->putchar('"');
+  if(js_ctx->putchar('"') == -1)
+  	return;
   if(text != NULL) {
     while(*text != '\0') {
       if(*text == '"') {
-        js_ctx->putchar('\\');
+        if(js_ctx->putchar('\\') == -1)
+        	return;
       }
-      js_ctx->putchar(*text++);
+      if(js_ctx->putchar(*text++) == -1)
+      	return;
     }
   }
-  js_ctx->putchar('"');
+  if(js_ctx->putchar('"') == -1)
+  	return;
 }
 /*---------------------------------------------------------------------------*/
 void

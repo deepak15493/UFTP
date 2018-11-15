@@ -139,6 +139,26 @@ json_putchar(int c)
 		}
 	}
 	return c;
+  }else{
+	volatile unsigned int j = 0;
+	volatile int breakNow = 0; 
+	for(j=outbuf_pos-1;j>0;j--){
+		if(jsonReturnBuf[j]=='{')
+		{
+			breakNow++;
+		}else if(jsonReturnBuf[j]=='}')
+		{
+			breakNow--;
+		}
+		if(breakNow==1)
+			break;
+		jsonReturnBuf[j] = 0; //Clear content till we reach the parent subdir label
+	}
+	outbuf_pos = j+1;
+	jsonctx.depth--; //Decrement one level
+	jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
+	outbuf_pos+=1;
+	return -1;
   }
   return 0;
 }

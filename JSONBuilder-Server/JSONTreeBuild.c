@@ -32,6 +32,8 @@ static void* jsongarbagecollect[512];
 
 static char path[2048];
 
+static dirTreeNode * dirTreeRoot;
+
 volatile static unsigned int gci = 0;
 volatile static unsigned int jsongci = 0;
 
@@ -76,23 +78,26 @@ static int recursivelistdir(const char *name, int indent,dirTreeNode * tempNode)
             if(recursivelistdir(path, indent + 2,tempChildNode)<0)
 				break;
         } else if ((entry->type == _A_NORMAL) || (entry->type == _A_ARCH)){
+        	
+        	if(tempNode != dirTreeRoot){
 			
-			tempChildNode = (dirTreeNode *)malloc(sizeof(dirTreeNode));
-		
-			memset(tempChildNode,0,sizeof(dirTreeNode));
+				tempChildNode = (dirTreeNode *)malloc(sizeof(dirTreeNode));
+			
+				memset(tempChildNode,0,sizeof(dirTreeNode));
+					
+				strcpy(tempChildNode->name,entry->d_name);
 				
-			strcpy(tempChildNode->name,entry->d_name);
-			
-            //printf("%*s- %s\n", indent, "", entry->d_name);			
-			tempChildNode->type = _A_ARCH;	
-
-			garbagecollect[gci++] = (void *)(tempChildNode);
-			
-			tempNode->children[tk] = (void *)tempChildNode;
-			tk+=1;
-			
-			if(tk > 20)
-				break;
+	            //printf("%*s- %s\n", indent, "", entry->d_name);			
+				tempChildNode->type = _A_ARCH;	
+	
+				garbagecollect[gci++] = (void *)(tempChildNode);
+				
+				tempNode->children[tk] = (void *)tempChildNode;
+				tk+=1;
+				
+				if(tk > 20)
+					break;
+			}
         }
     }
 	closedir(dir);
@@ -187,9 +192,9 @@ void purgeJSONTree(){
 	}
 }
 
-void* JSONTreeBuild()
+//void* JSONTreeBuild()
+int main()
 {
-	dirTreeNode * dirTreeRoot;
 	
 	memset(garbagecollect,0,256*sizeof(void*));
 	
@@ -204,7 +209,10 @@ void* JSONTreeBuild()
 	garbagecollect[gci++] = (void *)(dirTreeRoot);
 	
 	if(recursivelistdir(".", 0,dirTreeRoot) == -1)
-		return NULL;
+	{
+		//return NULL;
+		return -1;
+	}
 	
 	struct jsontree_pair* rootdirpair = (struct jsontree_pair*) malloc(sizeof(struct jsontree_pair)); 
 	memset(rootdirpair,0,sizeof(struct jsontree_pair));
@@ -229,6 +237,15 @@ void* JSONTreeBuild()
 			garbagecollect[k] = NULL;
 		}
 	}
+	
+	char* printfBuf;
+	
+	printfBuf = (char*)(fetchJSONBuffer("./",&final_tree));
+	
+	printf("%s",printfBuf);
+	
+	purgeJSONTree();
 
-	return (void*)(&final_tree);
+	//return (void*)(&final_tree);
+	return 0;
 }
