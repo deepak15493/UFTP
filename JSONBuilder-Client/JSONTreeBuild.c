@@ -1,7 +1,7 @@
 /******************************************************************************
 * FILENAME      : JSONTreeBuild                                                     
 *									      
-* DESCRIPTION   : Device server main module, which handles different events    
+* DESCRIPTION   : Client device main module, which handles different events    
 *                 from different modules.				      	
 * 									      
 ******************************************************************************/
@@ -9,10 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "jsonparse.h"
 #include "io.h"
 
-//{"F":"dirent.c","F":"dirent.h","F":"dirent.o","F":"json.h","F":"jsonparse.h","F":"jsontree.c","F":"jsontree.h","F":"jsontree.o","F":"JSONTreeBuild.c","F":"JSONTreeBuild.o","F":"Makefile.win","F":"Project1.dev","F":"Project1.exe","F":"Project1.layout","F":"serverperprocessmodules.c","F":"serverperprocessmodules.o","Test":{"F":"New Text Document.txt","Test1":{"F":"New Text Document.txt","Test2":{"F":"New Text Document.txt","Test3":{}}}}}
+//{\"F\":\"dirent.c\",\"F\":\"dirent.h\",\"F\":\"dirent.o\",\"F\":\"json.h\",\"F\":\"jsonparse.h\",\"F\":\"jsontree.c\",\"F\":\"jsontree.h\",\"F\":\"jsontree.o\",\"F\":\"JSONTreeBuild.c\",\"F\":\"JSONTreeBuild.o\",\"F\":\"Makefile.win\",\"F\":\"Project1.dev\",\"F\":\"Project1.exe\",\"F\":\"Project1.layout\",\"F\":\"serverperprocessmodules.c\",\"F\":\"serverperprocessmodules.o\",\"Test\":{\"F\":\"New Text Document.txt\",\"Test1\":{\"F\":\"New Text Document.txt\",\"Test2\":{\"F\":\"New Text Document.txt\",\"Test3\":{}}}}}
 
 struct dirTreeNode_t{
 	char name[64];
@@ -27,13 +28,15 @@ void* garbagecollect[256];
 
 static dirTreeNode * dirTreeRoot;
 
+static dirTreeNode * curTreeRoot; //Keep track of current directory
+
 static struct jsonparse_state js;
 
-static char rqpath[2048] = "./";
+static char rqpath[2048] = ".";
 
 volatile static unsigned int gci = 0;
 
-char JSONBuf[] = "{\"F\":\"dirent.c\",\"F\":\"dirent.h\",\"F\":\"dirent.o\",\"F\":\"json.h\",\"F\":\"jsonparse.h\",\"F\":\"jsontree.c\",\"F\":\"jsontree.h\",\"F\":\"jsontree.o\",\"F\":\"JSONTreeBuild.c\",\"F\":\"JSONTreeBuild.o\",\"F\":\"Makefile.win\",\"F\":\"Project1.dev\",\"F\":\"Project1.exe\",\"F\":\"Project1.layout\",\"F\":\"serverperprocessmodules.c\",\"F\":\"serverperprocessmodules.o\",\"Test\":{\"F\":\"New Text Document.txt\",\"Test1\":{\"F\":\"New Text Document.txt\",\"Test2\":{\"F\":\"New Text Document.txt\",\"Test3\":{}}}}}";
+char JSONTreeBuf[] = "{\"F\":\"dirent.c\",\"F\":\"dirent.h\",\"F\":\"dirent.o\",\"F\":\"json.h\",\"F\":\"jsonparse.h\",\"F\":\"jsontree.c\",\"F\":\"jsontree.h\",\"F\":\"jsontree.o\",\"F\":\"JSONTreeBuild.c\",\"F\":\"JSONTreeBuild.o\",\"F\":\"Makefile.win\",\"F\":\"Project1.dev\",\"F\":\"Project1.exe\",\"F\":\"Project1.layout\",\"F\":\"serverperprocessmodules.c\",\"F\":\"serverperprocessmodules.o\",\"Test\":{\"F\":\"New Text Document.txt\",\"Test1\":{\"F\":\"New Text Document.txt\",\"Test2\":{\"F\":\"New Text Document.txt\",\"Test3\":{}}}}}";
 
 void purgeDirTree()
 {
@@ -82,6 +85,36 @@ dirTreeNode *GetNodeAddr(char* dirpath){
 	return retNode;
 }
 
+void* getCommand(void* filename){//Only check if the filename is valid. The Python script must take care of rest
+	volatile unsigned int i = 0;
+	bool bfullpath = false;
+	char* temp = (char*)filename;
+	for(i=0;i<strlen(filename);i++)
+	{
+		if(temp[i] == '/' && temp[i+1]!='\0')
+		{
+			bfullpath = true; //This is a full path
+			break;
+		}
+	}
+	
+	if(bfullpath){
+		if(GetNodeAddr(temp))
+		{
+			return (void*)(rqpath);
+		}
+	}else{
+		for(i=0;i<20;i++)
+		{
+			if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
+			{
+				return (void*)(rqpath);
+			}
+		}
+	}
+	return NULL;
+}
+
 int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 {
 	volatile int type;
@@ -126,8 +159,8 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 					continue;
 				}
 				volatile unsigned int tempLen = strlen(dirpath);
-				strcat(dirpath,newNode->name);
 				strcat(dirpath,"/");
+				strcat(dirpath,newNode->name);
 				recursiveInterpret(dirpath,JSONTreeBuf);
 				*((char*)(dirpath + tempLen)) = '\0';
 			}
@@ -138,10 +171,10 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 	return 0;
 }
 	
-int JSONTreeInterpret(void* dirpath,void* JSONTreeBuf)
+int JSONTreeInterpret(void* JSONTreeBuf)
 {
 	jsonparse_setup(&js, (const char *)JSONTreeBuf, strlen((const char *)JSONTreeBuf));
-	recursiveInterpret(dirpath,JSONTreeBuf);
+	recursiveInterpret((void*)(&rqpath[0]),JSONTreeBuf);
 }
 
 void printDirTree(dirTreeNode *printtree,int tab){
@@ -152,13 +185,79 @@ void printDirTree(dirTreeNode *printtree,int tab){
 				printf("%*s- %s\n", tab, "", ((dirTreeNode*)(printtree->children[i]))->name);
 			}else{
 				printf("%*s[%s]\n", tab, "", ((dirTreeNode*)(printtree->children[i]))->name);
-				printDirTree(printtree->children[i],tab+1);
+				//printDirTree(printtree->children[i],tab+1);
 			}
 		}
 	}
 }
 
-int main()
+void listDir(){ //Call this from the Python file when the user inputs "ls"
+	printDirTree(curTreeRoot,0);
+}
+
+int changeDir(void* subDir){ //Call this from the Python file when the user inputs "cs path". Give the path to this function
+	volatile unsigned int i = 0;
+	bool bfullpath = false;
+	char* temp = (char*)subDir;
+	char goBack[] = "..";
+	for(i=0;i<strlen(subDir);i++)
+	{
+		if(temp[i] == '/' && temp[i+1]!='\0')
+		{
+			bfullpath = true; //This is a full path
+			break;
+		}
+	}
+	i=0;
+	dirTreeNode *tempNode = NULL;
+	if(bfullpath){
+		tempNode = GetNodeAddr(temp);
+		if(tempNode){
+			curTreeRoot = tempNode;
+			memset(rqpath,0,sizeof(rqpath));
+			strcpy(rqpath,temp);
+			if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
+					return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
+			}
+		}
+	}else if(strncmp(goBack,temp,strlen(goBack))==0){
+		if(curTreeRoot != dirTreeRoot){
+			volatile unsigned int k;
+			for(k= strlen(rqpath)-1;k>0;k--){
+				if(rqpath[k] == '/'){
+					rqpath[k] = 0;
+					break;
+				}
+				rqpath[k] = 0;
+			}
+			tempNode = GetNodeAddr(&rqpath[0]);
+			if(tempNode){
+				curTreeRoot = tempNode;
+			}
+		}
+	}else{
+		for(i=0;i<20;i++)
+		{
+			if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
+			{
+				strcat(rqpath,"/");
+				strcat(rqpath,temp);
+				curTreeRoot = (dirTreeNode*)(curTreeRoot->children[i]);
+				if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
+					return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
+				}
+				break;
+			}
+		}
+	}
+	if((tempNode == NULL) || (i >=20))
+	{
+		return 1; //If this is returned to the Python script, then print error message saying that the dir doesn't exist
+	}
+	return 0;
+}
+
+void* InitDirTree()
 {
 	
 	memset(garbagecollect,0,256*sizeof(void*));
@@ -175,11 +274,7 @@ int main()
 	
 	gci+=1;
 	
-	JSONTreeInterpret((void*)(&rqpath[0]),(void*)(JSONBuf));
-	
-	printDirTree(dirTreeRoot,0);
-	
-	purgeDirTree();
+	curTreeRoot = dirTreeRoot;
 
-	return 0;
+	return (void*)(rqpath);
 }
