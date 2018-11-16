@@ -63,6 +63,13 @@ dirTreeNode *GetNodeAddr(char* dirpath){
 	do{
 		if(strncmp(tempNode->name,&dirpath[offset],strlen(tempNode->name)) == 0)
 		{
+			if(dirpath[offset + strlen(tempNode->name)]){
+				if(dirpath[offset + strlen(tempNode->name)]!='/'){
+					tk+=1;
+					tempNode = tempParentNode->children[tk]; //Check next child
+					continue;
+				}
+			}
 			for(k=offset;k<len;k++)
 			{
 				if(dirpath[k]=='/')
@@ -243,17 +250,32 @@ int changeDir(void* subDir){ //Call this from the Python file when the user inpu
 			rqpath[0] = '.';
 			curTreeRoot = dirTreeRoot;
 		}else{
+			if(strncmp(curTreeRoot->name,temp,strlen(curTreeRoot->name))==0){
+				if(temp[strlen(curTreeRoot->name)]!= '\0'){
+					if(temp[strlen(curTreeRoot->name)]=='/'){
+						return 0;
+					}
+				}else{
+					return 0;
+				}
+			}
 			for(i=0;i<20;i++)
 			{
 				if(curTreeRoot->children[i]){
 					if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name))==0)
 					{
+						if(temp[strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name)]){
+							if(temp[strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name)]!='/'){
+								continue;
+							}
+						}
 						strcat(rqpath,"/");
-						strncpy(rqpath,temp,strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name));
+						strncat(rqpath,temp,strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name));
 						curTreeRoot = (dirTreeNode*)(curTreeRoot->children[i]);
 						if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
 							return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
 						}
+						tempNode = 1;
 						break;
 					}
 				}
