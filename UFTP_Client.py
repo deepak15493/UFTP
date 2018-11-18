@@ -27,7 +27,7 @@ def UFTPC_CLI():
             pass
         if return_code == 1:
             #error, directory DNE
-            pass
+            break
         if return_code == 2:
             #
             pass

@@ -39,8 +39,11 @@ class CLI(cmd.Cmd):
         # path = self.checkArg(path)
         # print("path = ", path)
         print(path)
+        if len(path) < 1:
+            print("No path given")
+            return 1
         #print(libUFTP.changeDir(path))
-        return libUFTP.changeDir(path)
+        print(libUFTP.changeDir(path.encode("utf-8")))
         # call JSON Function for cd
         # check return value of JSON function
         # 0 : success

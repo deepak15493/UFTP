@@ -10,6 +10,6 @@ def Socket_Send(sock,UDP_IP,UDP_PORT,MESSAGE):
         sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
 def Socket_Rcv(sock):
-    data, addr = sock.recvfrom(1024)
+    data, addr = sock.recvfrom(16384)
     #print("Received: ", data.decode("utf-8"))
     return(data.decode("utf-8"),addr)
