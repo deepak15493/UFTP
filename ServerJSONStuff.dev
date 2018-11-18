@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000001000000
-UnitCount=5
+UnitCount=4
 
 [VersionInfo]
 Major=1
@@ -50,28 +50,8 @@ ProductVersion=1.0.0.0
 AutoIncBuildNr=0
 SyncProduct=1
 
-[Unit2]
-FileName=JSONTreeBuild.c
-CompileCpp=0
-Folder=ServerJSONStuff
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit1]
-FileName=dll.h
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
 [Unit3]
-FileName=dirent.c
+FileName=s_JSONTreeBuild.c
 CompileCpp=0
 Folder=ServerJSONStuff
 Compile=1
@@ -92,6 +72,26 @@ BuildCmd=
 
 [Unit5]
 FileName=serverperprocessmodules.c
+CompileCpp=0
+Folder=ServerJSONStuff
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit1]
+FileName=serverperprocessmodules.c
+CompileCpp=0
+Folder=ServerJSONStuff
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit2]
+FileName=dirent.c
 CompileCpp=0
 Folder=ServerJSONStuff
 Compile=1

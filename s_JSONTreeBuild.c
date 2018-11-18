@@ -12,7 +12,7 @@
 #include "jsontree.h"
 #include "io.h"
 #include "dirent.h" //POSIX wrapper for WIN32 directory APIs 
-#include <dll.h>
+#include <s_dll.h>
 
 /*----------------------------------------------------------------------------*/
 

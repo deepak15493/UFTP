@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "jsontree.h"
-#include <dll.h>
+#include <s_dll.h>
 /*----------------------------------------------------------------------------*/
 
 static struct jsontree_context jsonctx;

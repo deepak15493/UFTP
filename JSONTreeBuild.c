@@ -143,6 +143,10 @@ static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 				len++;
 			}
 			jsonparse_copy_value(&js, (char*)(newNode->name), (len+1));
+			if(strncmp(newNode->name,".",1)==0){ //If there is another '.' in the JSON Buffer, simply discard
+				free(newNode);
+				continue;
+			}
 			if((type = jsonparse_next(&js)) == JSON_TYPE_STRING){//This is a file
 				memset(newNode,0,sizeof(dirTreeNode));
 				newNode->type = _A_ARCH;
