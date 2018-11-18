@@ -148,6 +148,7 @@ static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 				continue;
 			}
 			if((type = jsonparse_next(&js)) == JSON_TYPE_STRING){//This is a file
+				printf("\nFile success\n");
 				memset(newNode,0,sizeof(dirTreeNode));
 				newNode->type = _A_ARCH;
 				len = 0;
@@ -162,6 +163,7 @@ static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 				tempParent->children[tk] = newNode;
 				tempParent->numchildren +=1;
 			}else {//This is a sub-directory
+				printf("\nSUBDIR success\n");
 				newNode->type = _A_SUBDIR;
 				dirTreeNode *tempParent = GetNodeAddr((char*)(dirpath));
 				while(tempParent->children[tk]){
