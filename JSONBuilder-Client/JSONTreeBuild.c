@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include "jsonparse.h"
 #include "io.h"
+#include "dll.h"
 
 //{\"F\":\"dirent.c\",\"F\":\"dirent.h\",\"F\":\"dirent.o\",\"F\":\"json.h\",\"F\":\"jsonparse.h\",\"F\":\"jsontree.c\",\"F\":\"jsontree.h\",\"F\":\"jsontree.o\",\"F\":\"JSONTreeBuild.c\",\"F\":\"JSONTreeBuild.o\",\"F\":\"Makefile.win\",\"F\":\"Project1.dev\",\"F\":\"Project1.exe\",\"F\":\"Project1.layout\",\"F\":\"serverperprocessmodules.c\",\"F\":\"serverperprocessmodules.o\",\"Test\":{\"F\":\"New Text Document.txt\",\"Test1\":{\"F\":\"New Text Document.txt\",\"Test2\":{\"F\":\"New Text Document.txt\",\"Test3\":{}}}}}
 
@@ -36,9 +37,9 @@ static char rqpath[2048] = ".";
 
 volatile static unsigned int gci = 0;
 
-char JSONTreeBuf[] = "{\"F\":\"dirent.c\",\"F\":\"dirent.h\",\"F\":\"dirent.o\",\"F\":\"json.h\",\"F\":\"jsonparse.h\",\"F\":\"jsontree.c\",\"F\":\"jsontree.h\",\"F\":\"jsontree.o\",\"F\":\"JSONTreeBuild.c\",\"F\":\"JSONTreeBuild.o\",\"F\":\"Makefile.win\",\"F\":\"Project1.dev\",\"F\":\"Project1.exe\",\"F\":\"Project1.layout\",\"F\":\"serverperprocessmodules.c\",\"F\":\"serverperprocessmodules.o\",\"Test\":{\"F\":\"New Text Document.txt\",\"Test1\":{\"F\":\"New Text Document.txt\",\"Test2\":{\"F\":\"New Text Document.txt\",\"Test3\":{}}}}}";
+//char JSONTreeBuf[] = "{\"F\":\"dirent.c\",\"F\":\"dirent.h\",\"F\":\"dirent.o\",\"F\":\"json.h\",\"F\":\"jsonparse.h\",\"F\":\"jsontree.c\",\"F\":\"jsontree.h\",\"F\":\"jsontree.o\",\"F\":\"JSONTreeBuild.c\",\"F\":\"JSONTreeBuild.o\",\"F\":\"Makefile.win\",\"F\":\"Project1.dev\",\"F\":\"Project1.exe\",\"F\":\"Project1.layout\",\"F\":\"serverperprocessmodules.c\",\"F\":\"serverperprocessmodules.o\",\"Test\":{\"F\":\"New Text Document.txt\",\"Test1\":{\"F\":\"New Text Document.txt\",\"Test2\":{\"F\":\"New Text Document.txt\",\"Test3\":{}}}}}";
 
-void purgeDirTree()
+DLLIMPORT void purgeDirTree()
 {
 	volatile unsigned int k;
 	
@@ -51,7 +52,7 @@ void purgeDirTree()
 	}
 }
 
-dirTreeNode *GetNodeAddr(char* dirpath){
+static dirTreeNode *GetNodeAddr(char* dirpath){
 	volatile unsigned int k = 0;	
 	dirTreeNode *retNode = NULL;
 	volatile unsigned int offset = 0;
@@ -92,7 +93,7 @@ dirTreeNode *GetNodeAddr(char* dirpath){
 	return retNode;
 }
 
-void* getCommand(void* filename){//Only check if the filename is valid. The Python script must take care of rest
+DLLIMPORT void* getCommand(void* filename){//Only check if the filename is valid. The Python script must take care of rest
 	volatile unsigned int i = 0;
 	bool bfullpath = false;
 	char* temp = (char*)filename;
@@ -124,7 +125,7 @@ void* getCommand(void* filename){//Only check if the filename is valid. The Pyth
 	return NULL;
 }
 
-int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
+static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 {
 	volatile int type;
 	char* cJSONTreeBuf = (char*)JSONTreeBuf;
@@ -180,13 +181,13 @@ int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 	return 0;
 }
 	
-int JSONTreeInterpret(void* JSONTreeBuf)
+DLLIMPORT int JSONTreeInterpret(void* JSONTreeBuf)
 {
 	jsonparse_setup(&js, (const char *)JSONTreeBuf, strlen((const char *)JSONTreeBuf));
 	return recursiveInterpret((void*)(&rqpath[0]),JSONTreeBuf);
 }
 
-void printDirTree(dirTreeNode *printtree,int tab){
+static void printDirTree(dirTreeNode *printtree,int tab){
 	volatile int i;
 	for(i=0;i<20;i++){
 		if(printtree->children[i]){
@@ -200,11 +201,11 @@ void printDirTree(dirTreeNode *printtree,int tab){
 	}
 }
 
-void listDir(){ //Call this from the Python file when the user inputs "ls"
+DLLIMPORT void listDir(){ //Call this from the Python file when the user inputs "ls"
 	printDirTree(curTreeRoot,0);
 }
 
-int changeDir(void* subDir){ //Call this from the Python file when the user inputs "cs path". Give the path to this function
+DLLIMPORT int changeDir(void* subDir){ //Call this from the Python file when the user inputs "cs path". Give the path to this function
 	volatile unsigned int i = 0;
 	bool bfullpath = false;
 	char* temp = (char*)subDir;
@@ -289,7 +290,7 @@ int changeDir(void* subDir){ //Call this from the Python file when the user inpu
 	return 0;
 }
 
-void* InitDirTree()
+DLLIMPORT void* InitDirTree()
 {
 	
 	memset(garbagecollect,0,256*sizeof(void*));

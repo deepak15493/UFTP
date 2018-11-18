@@ -1,0 +1,8 @@
+; dlltool --base-file C:\Users\NITESH\AppData\Local\Temp\cca08644.base --output-exp ClientJSONStuff.exp --dllname ClientJSONStuff.dll --output-def libClientJSONStuff.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup --def C:\Users\NITESH\AppData\Local\Temp\cca08644.def --output-lib libClientJSONStuff.a
+EXPORTS
+	JSONTreeInterpret @ 1
+	changeDir @ 2
+	getCommand @ 3
+	listDir @ 4
+	purgeDirTree @ 5
+	InitDirTree @ 6

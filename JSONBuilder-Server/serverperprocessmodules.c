@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "jsontree.h"
-
+#include <dll.h>
 /*----------------------------------------------------------------------------*/
 
 static struct jsontree_context jsonctx;
@@ -19,7 +19,7 @@ volatile static unsigned int outbuf_pos = 0;
 
 static char jsonReturnBuf[16384];
 
-struct jsontree_value *
+static struct jsontree_value *
 find_json_path(struct jsontree_context *json, char *path)
 {
   struct jsontree_value *v;
@@ -163,7 +163,7 @@ json_putchar(int c)
   return 0;
 }
 
-void* fetchJSONBuffer(char* filepath,struct jsontree_object* final_tree){
+DLLIMPORT void* fetchJSONBuffer(char* filepath,struct jsontree_object* final_tree){
 	struct jsontree_value *v;
 	
 	memset(jsonReturnBuf,0,sizeof(jsonReturnBuf));

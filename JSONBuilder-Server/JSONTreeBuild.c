@@ -12,6 +12,7 @@
 #include "jsontree.h"
 #include "io.h"
 #include "dirent.h" //POSIX wrapper for WIN32 directory APIs 
+#include <dll.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -182,7 +183,7 @@ convertToJSONTree(dirTreeNode * tempNode)
 	return (struct jsontree_value *)(dirobj);
 }
 
-void purgeJSONTree(){
+DLLIMPORT void purgeJSONTree(){
 	volatile unsigned int j;
 	for(j=0;j<jsongci;j++)
 	{
@@ -193,7 +194,7 @@ void purgeJSONTree(){
 	}
 }
 
-void* JSONTreeBuild()
+DLLIMPORT void* JSONTreeBuild()
 {
 	
 	memset(garbagecollect,0,256*sizeof(void*));

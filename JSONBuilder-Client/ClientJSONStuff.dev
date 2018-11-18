@@ -1,7 +1,7 @@
 [Project]
-FileName=Project1.dev
-Name=Project1
-Type=1
+FileName=ClientJSONStuff.dev
+Name=ClientJSONStuff
+Type=3
 Ver=2
 ObjFiles=
 Includes=.
@@ -9,9 +9,9 @@ Libs=
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
-Compiler=
-CppCompiler=
-Linker=
+Compiler=-DBUILDING_DLL=1_@@_
+CppCompiler=-DBUILDING_DLL=1_@@_
+Linker=--no-export-all-symbols --add-stdcall-alias_@@_
 IsCpp=0
 Icon=
 ExeOutput=
@@ -19,7 +19,7 @@ ObjectOutput=
 LogOutput=
 LogOutputEnabled=0
 OverrideOutput=0
-OverrideOutputName=Project1.exe
+OverrideOutputName=ClientJSONStuff.dll
 HostApplication=
 Folders=
 CommandLine=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000001000000
-UnitCount=4
+UnitCount=3
 
 [VersionInfo]
 Major=1
@@ -50,20 +50,20 @@ ProductVersion=1.0.0.0
 AutoIncBuildNr=0
 SyncProduct=1
 
-[Unit1]
-FileName=JSONTreeBuild.c
+[Unit2]
+FileName=jsonparse.c
 CompileCpp=0
-Folder=Project1
+Folder=ClientJSONStuff
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit2]
-FileName=dirent.c
+[Unit1]
+FileName=dll.h
 CompileCpp=0
-Folder=Project1
+Folder=
 Compile=1
 Link=1
 Priority=1000
@@ -71,19 +71,9 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit3]
-FileName=jsontree.c
+FileName=JSONTreeBuild.c
 CompileCpp=0
-Folder=Project1
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit4]
-FileName=serverperprocessmodules.c
-CompileCpp=0
-Folder=Project1
+Folder=ClientJSONStuff
 Compile=1
 Link=1
 Priority=1000
