@@ -25,10 +25,8 @@ def UFTP_Server_Child(sock,server_IP,server_Port):
         data = UFTP_Sockets.Socket_Rcv(sock)
         if data.startswith("DGET",0,4):
             print(data.split("DGET ")[1])
-            jsonpayload = string_at(libUFTP.fetchJSONBuffer(data.split("DGET ")[1],final_tree)).decode("utf-8")
-            payload = jsonpayload[5:len(jsonpayload)-1]
+            jsonpayload = string_at(libUFTP.fetchJSONBuffer(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
             print(jsonpayload)
-            print(payload)
         #if "DGET" in data.split(" .")[0]:
             
         #check for socket input
