@@ -5,6 +5,7 @@ import sys
 from ctypes import *
 
 libUFTP = CDLL("./ServerJSONStuff.dll")
+addressList = []
 #when server starts up: Initialize JSON Tree, variables, and client states
 
 #continuous loop for server parent thread
@@ -22,13 +23,16 @@ def UFTP_Server_Parent():
 def UFTP_Server_Child(sock,server_IP,server_Port):
     sock.bind((server_IP,server_Port))
     while(True):
-        data = UFTP_Sockets.Socket_Rcv(sock)
+        data,addr = UFTP_Sockets.Socket_Rcv(sock)
+        if addr not in addressList:
+            #new client
+            print("new client at : ", addr)
+            addressList.append(addr)
         if data.startswith("DGET",0,4):
             print(data.split("DGET ")[1])
             jsonpayload = string_at(libUFTP.fetchJSONBuffer(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
             print(jsonpayload)
-        #if "DGET" in data.split(" .")[0]:
-            
+            UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],jsonpayload.encode("utf-8"))            
         #check for socket input
             #if directory exploration command
                 #look up JSON tree

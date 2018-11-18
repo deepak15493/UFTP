@@ -52,7 +52,7 @@ class CLI(cmd.Cmd):
         Prints the path of the current Working Directory"""
         print("path = ", self.g_path)
 
-    def do_ls(self):
+    def do_ls(self,arg):
         """ls
         List the contnets of the current directory"""
         libUFTP.listDir()
