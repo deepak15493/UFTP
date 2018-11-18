@@ -148,7 +148,6 @@ static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 				continue;
 			}
 			if((type = jsonparse_next(&js)) == JSON_TYPE_STRING){//This is a file
-				printf("\nFile success\n");
 				memset(newNode,0,sizeof(dirTreeNode));
 				newNode->type = _A_ARCH;
 				len = 0;
@@ -163,7 +162,6 @@ static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 				tempParent->children[tk] = newNode;
 				tempParent->numchildren +=1;
 			}else {//This is a sub-directory
-				printf("\nSUBDIR success\n");
 				newNode->type = _A_SUBDIR;
 				dirTreeNode *tempParent = GetNodeAddr((char*)(dirpath));
 				while(tempParent->children[tk]){
@@ -256,6 +254,7 @@ DLLIMPORT int changeDir(void* subDir){ //Call this from the Python file when the
 			memset(rqpath,0,sizeof(rqpath));
 			rqpath[0] = '.';
 			curTreeRoot = dirTreeRoot;
+			return 0;
 		}else{
 			if(strncmp(curTreeRoot->name,temp,strlen(curTreeRoot->name))==0){
 				if(temp[strlen(curTreeRoot->name)]!= '\0'){

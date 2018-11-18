@@ -165,9 +165,6 @@ json_putchar(int c)
 
 DLLIMPORT void* fetchJSONBuffer(char* filepath,struct jsontree_object* final_tree){
 	struct jsontree_value *v;
-	printf("\nRequested path: %c\n",filepath[0]);
-	printf("\nRequested path: %c\n",filepath[1]);
-	
 	memset(jsonReturnBuf,0,sizeof(jsonReturnBuf));
 	outbuf_pos = 0;
 	v = (struct jsontree_value *)(final_tree);
