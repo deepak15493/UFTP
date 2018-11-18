@@ -1,4 +1,4 @@
-; dlltool --base-file C:\Users\NITESH\AppData\Local\Temp\cca07608.base --output-exp ServerJSONStuff.exp --dllname ServerJSONStuff.dll --output-def libServerJSONStuff.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup --def C:\Users\NITESH\AppData\Local\Temp\cca07608.def --output-lib libServerJSONStuff.a
+; dlltool --base-file C:\Users\NITESH\AppData\Local\Temp\cca03368.base --output-exp ServerJSONStuff.exp --dllname ServerJSONStuff.dll --output-def libServerJSONStuff.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup --def C:\Users\NITESH\AppData\Local\Temp\cca03368.def --output-lib libServerJSONStuff.a
 EXPORTS
 	fetchJSONBuffer @ 1
 	purgeJSONTree @ 2
