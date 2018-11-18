@@ -2,6 +2,7 @@ import sys
 import traceback
 import UFTP_Sockets
 import threading
+import CLI
 
 #get socket info from user input
 def UFTPC_Get_Socket():
@@ -14,7 +15,8 @@ def UFTPC_Get_Socket():
 #when socket has been established, use CLI to send command
 def UFTPC_CLI():
     #get user input("Command: ")
-    command = input("Command: ")
+    #command = input("Command: ")
+    CLI_Class = CLI.CLI()
     #do error checking for valid command syntax
     #return serialized valid CLI command to send over socket
     return command.encode("utf-8")
