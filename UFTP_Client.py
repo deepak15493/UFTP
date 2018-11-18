@@ -3,6 +3,7 @@ import traceback
 import UFTP_Sockets
 import threading
 import CLI
+from ctypes import *
 
 #get socket info from user input
 def UFTPC_Get_Socket():
@@ -16,17 +17,32 @@ def UFTPC_Get_Socket():
 def UFTPC_CLI():
     #get user input("Command: ")
     #command = input("Command: ")
-    CLI_Class = CLI.CLI()
-    #do error checking for valid command syntax
+    #CLI_Class = CLI.CLI()
+    return_code = CLI_Class.cmdloop()
     #return serialized valid CLI command to send over socket
-    return command.encode("utf-8")
+    if return_code == 0:
+        #success
+        pass
+    if return_code == 1:
+        #error, directory DNE
+        pass
+    if return_code == 2:
+        #
+        pass
+    #return command.encode("utf-8")
     
 #continuous loop for server parent thread
 def UFTPC_Send(socket_info):
-    while(True):
-        command = UFTPC_CLI()
-        UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],command)
-        
+    UFTPC_CLI()
+    #while(True):
+        #command = UFTPC_CLI()
+        #UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],command)
+
+def UFTPC_Init_Tree(socket_info,rqpath):
+    rqpath1 = "DGET " + rqpath + "/"
+    print(rqpath1)
+    UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],rqpath1.encode("utf-8"))
+    
 def UFTPC_Receive():
     while(True):
         #wait for server response on socket
@@ -35,12 +51,16 @@ def UFTPC_Receive():
 def UFTP_Client():
     #when client starts up: request server IP/UDP Port and establish socket
     socket_info = UFTPC_Get_Socket()
+    rqpath = CLI_Class.initTree()
+    rqpathptr = string_at(rqpath).decode("utf-8")
+    UFTPC_Init_Tree(socket_info,rqpathptr)
     #make threads for send/rcv?
     UFTPC_Send(socket_info)
     #UFTPC_Receive()
     
 if __name__ == "__main__":
     try:
+        CLI_Class = CLI.CLI()
         sys.exit(UFTP_Client())
     except SystemExit:
         print('Quit the Thread.\n\n')

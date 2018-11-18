@@ -8,19 +8,22 @@ else:
 
 import cmd
 from ctypes import *
-libUFTP = CDLL("ClientJSONStuff.dll")
-
+libUFTP = CDLL("./ClientJSONStuff.dll")
 
 class CLI(cmd.Cmd):
     prompt = "\n$ "
     intro = "Please select a file to download.  Use standard Linux commands to navigate the file hierarchy.\nType 'help' for a list of commands.  "
     g_path = "~/"
-
+    rqpath = ""
+    
     def checkArg(self, arg):
         if(" " in arg):
             print("Path must not contain spaces.")
             return ""
         return arg
+    def initTree(self):
+        #client-side code to create initial client path object
+        return libUFTP.InitDirTree()
 #-------------------------------------------------------------------
     def do_greet(self, person):
         """greet [person]
@@ -35,7 +38,14 @@ class CLI(cmd.Cmd):
         Change Directory to the path specified"""
         # path = self.checkArg(path)
         # print("path = ", path)
-        print(libUFTP.changeDir(path))
+        print(path)
+        #print(libUFTP.changeDir(path))
+        return libUFTP.changeDir(path)
+        # call JSON Function for cd
+        # check return value of JSON function
+        # 0 : success
+        # 1 : error, directory does not exist
+        # 2 : send something to server
 
     def do_pwd(self, arg):
         """pwd
@@ -76,7 +86,7 @@ class CLI(cmd.Cmd):
         return True
 
     def postloop(self):
-        pass
+        libUFTP.purgeDirTree()
         # print("Exiting the CLI...")
 
 
