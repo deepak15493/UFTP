@@ -1,18 +1,24 @@
 import sys
 import traceback
-
+import UFTP_Sockets
 #when server starts up: Initialize JSON Tree, variables, and client states
 
 #continuous loop for server parent thread
 def UFTP_Server_Parent():
-    while(True):
+    server_IP = "127.0.0.1"
+    server_Port = 5731
+    sock = UFTP_Sockets.Initialize_Socket()
+    UFTP_Server_Child(sock,server_IP,server_Port)
+    #while(True):
         #accept socket conn
         #if new socket : get IP addr and track it
         #create server child thread and pass socket ID
         #threads must be detatched
 
-def UFTP_Server_Child():
+def UFTP_Server_Child(sock,server_IP,server_Port):
+    sock.bind((server_IP,server_Port))
     while(True):
+        UFTP_Sockets.Socket_Rcv(sock)
         #check for socket input
             #if directory exploration command
                 #look up JSON tree
