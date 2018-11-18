@@ -48,7 +48,7 @@ def UFTPC_Init_Tree(socket_info,rqpath):
     UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],rqpath1.encode("utf-8"))
     data,addr = UFTP_Sockets.Socket_Rcv(socket_info[0])
     print("Received : " + data + " from " + addr[0] + ":" + str(addr[1]))
-    print(libUFTP.JSONTreeInterpret(data))
+    print(libUFTP.JSONTreeInterpret(data.encode("utf-8")))
     
 def UFTPC_Receive():
     while(True):
