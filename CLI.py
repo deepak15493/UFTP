@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 try:
     import readline
 except ImportError:
@@ -165,4 +164,3 @@ class CLI(cmd.Cmd):
 
 if __name__ == '__main__':
     CLI().cmdloop()
->>>>>>> 571b880f830aafe42e614940e90ef9e08f710f0b
