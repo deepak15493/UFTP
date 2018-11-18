@@ -1,34 +1,41 @@
 import sys
 import traceback
+import UFTP_Sockets
+import threading
 
 #get socket info from user input
 def UFTPC_Get_Socket():
-    #server_IP = input("Server IP Address: ")
-    #server_Port = input("Server UDP Port: ")
-    #return initialize_socket(server_IP,server_Port)
+    server_IP = input("Server IP Address: ")
+    ##check to verify correct IP format
+    server_Port = int(input("Server UDP Port: "))
+    ##check to verify correct port format
+    return (UFTP_Sockets.Initialize_Socket(),server_IP,server_Port)
 
 #when socket has been established, use CLI to send command
 def UFTPC_CLI():
     #get user input("Command: ")
+    command = input("Command: ")
     #do error checking for valid command syntax
-    #return valid CLI command to send over socket
+    #return serialized valid CLI command to send over socket
+    return command.encode("utf-8")
     
 #continuous loop for server parent thread
-def UFTPC_Send():
+def UFTPC_Send(socket_info):
     while(True):
-        #command = UFTPC_CLI()
-        #socket_send(command)
+        command = UFTPC_CLI()
+        UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],command)
         
 def UFTPC_Receive():
     while(True):
         #wait for server response on socket
+        pass
 
 def UFTP_Client():
     #when client starts up: request server IP/UDP Port and establish socket
-    #socket = UFTPC_Get_Socket():
+    socket_info = UFTPC_Get_Socket()
     #make threads for send/rcv?
-        #UFTPC_Send()
-        #UFTPC_Receive()
+    UFTPC_Send(socket_info)
+    #UFTPC_Receive()
     
 if __name__ == "__main__":
     try:
