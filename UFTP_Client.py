@@ -73,7 +73,11 @@ if __name__ == "__main__":
         sys.exit(UFTP_Client())
     except SystemExit:
         print('Quit the Thread.\n\n')
-        sys.exit() 
+        sys.exit()
+    except KeyboardInterrupt:
+        libUFTP.purgeDirTree()
+        print("Purging dir tree and exiting")
+        raise
     except Exception as e:
         print ("Error!")
         print(e) 

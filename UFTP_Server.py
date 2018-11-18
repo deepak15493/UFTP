@@ -55,7 +55,11 @@ if __name__ == "__main__":
         sys.exit(UFTP_Server_Parent())
     except SystemExit:
         print('Quit the Thread.\n\n')
-        sys.exit() 
+        sys.exit()
+    except KeyboardInterrupt:
+        libUFTP.purgeJSONTree()
+        print("Purging JSON Tree and exiting")
+        raise
     except Exception as e:
         print ("Error!")
         print(e) 
