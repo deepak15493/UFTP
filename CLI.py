@@ -89,8 +89,8 @@ class CLI(cmd.Cmd):
         return True
 
     def postloop(self):
-        libUFTP.purgeDirTree()
-        # print("Exiting the CLI...")
+        #libUFTP.purgeDirTree()
+        print("Exiting the cmd post loop...")
 
 
 if __name__ == '__main__':
