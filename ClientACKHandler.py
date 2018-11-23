@@ -1,9 +1,12 @@
 import random
+
 import struct
 import select
 import hashlib
 from collections import namedtuple
+
 from threading import Thread
+
 
 class ClientACKHandler(Thread):
     ACK = namedtuple("ACK", ["AckNumber", "Checksum"])
@@ -79,7 +82,7 @@ class ClientACKHandler(Thread):
         else:
             return False
 
-    def simulate_packet_loss(self):
+    def simulate_ack_loss(self):
         if random.randint(1, 10) <= 2:
             return True
         else:

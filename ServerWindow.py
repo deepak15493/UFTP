@@ -1,6 +1,8 @@
-import os
+
 import math
+
 from collections import OrderedDict
+
 
 class ServerWindow(object):
     def __init__(self, sequenceNumberBits, windowSize=None):

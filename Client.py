@@ -1,8 +1,8 @@
 import os
+
 from ClientSender import ClientSender
 
 class Client(object):
-    def driver():
         fileName = 'temp.txt'
         senderIP = '127.0.0.1'
         senderPort = 8081
@@ -26,7 +26,3 @@ class Client(object):
             raise  Exception
         finally:
             sender.close()
-
-
-    if __name__ == "__main__":
-        driver()

@@ -1,5 +1,7 @@
 import os
+
 import socket
+
 from ClientWindow import ClientWindow
 from ClientPacketHandler import ClientPacketHandler
 from ClientACKHandler import ClientACKHandler

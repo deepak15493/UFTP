@@ -1,10 +1,9 @@
 import os
 
+
 from ServerReceiver import ServerReceiver
 
-
 class Server(object):
-    def driver():
         fileName = 'temp.txt'
         senderIP = '127.0.0.1'
         senderPort = 8081
@@ -25,6 +24,3 @@ class Server(object):
             print('Exception Occurred')
         finally:
             server.close()
-
-    if __name__ == "__main__":
-        driver()
