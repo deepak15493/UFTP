@@ -1,6 +1,4 @@
 import os
-
-
 from ServerReceiver import ServerReceiver
 
 class Server(object):

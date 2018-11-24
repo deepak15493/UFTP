@@ -1,18 +1,15 @@
 import os
-
 import socket
-
-
 from ServerWindow import ServerWindow
 from ServerPacketHandler import ServerPacketHandler
 
 class ServerReceiver(object):
-    def __init__(self, receiverIP, receiverPort, sequenceNumberBits=2, windowSize=None, www=os.path.join(os.getcwd(), "data", "receiver")):
+    def __init__(self, receiverIP, receiverPort, sequenceNumberBits=2, windowSize=None, path=os.path.join(os.getcwd(), "data", "receiver")):
         self.receiverIP = receiverIP
         self.receiverPort = receiverPort
         self.sequenceNumberBits = sequenceNumberBits
         self.windowSize = windowSize
-        self.www = www
+        self.path = path
         self.fileHandle = None
 
     def open(self):
@@ -21,17 +18,14 @@ class ServerReceiver(object):
             self.receiverSocket.bind((self.receiverIP, self.receiverPort))
             self.receiverSocket.setblocking(0)
         except Exception as e:
-            print("Creating UDP socket %s:%d for communication with the client failed!"
-                              % (self.receiverIP, self.receiverPort))
+            print("Creating UDP socket {}:{} for communication with the client failed!".format(self.receiverIP, self.receiverPort))
 
     def receive(self, filename, senderIP="127.0.0.1", senderPort=8081, timeout=10):
-        filename = os.path.join(self.www, filename)
+        filename = os.path.join(self.path, filename)
         try:
             self.fileHandle = open(filename, "wb")
         except IOError as e:
-            print("Creating a file handle failed!\nFilename: %s"
-                              % filename)
-            raise Exception
+            print("Creating a file handle failed! Filename: {}".format(filename))
 
         window = ServerWindow(self.sequenceNumberBits, self.windowSize)
 
@@ -51,4 +45,4 @@ class ServerReceiver(object):
             if self.receiverSocket:
                 self.receiverSocket.close()
         except Exception as e:
-            print("Closing UDP socket %s:%d failed!" % (self.receiverIP, self.receiverPort))
+            print("Closing UDP socket {}:{} failed!".format(self.receiverIP, self.receiverPort))

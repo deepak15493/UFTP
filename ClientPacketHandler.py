@@ -1,22 +1,15 @@
-
 import time
-
 import random
-
 import struct
 from collections import namedtuple
-
 from threading import Thread
 from threading import Lock
-
 
 LOCK = Lock()
 
 class ClientPacketHandler(Thread):
-
     HEADER_LENGTH = 6
     PACKET = namedtuple("Packet", ["SequenceNumber", "Checksum", "Data"])
-
     def __init__(self, filename, senderSocket, senderIP, senderPort, receiverIP, receiverPort, window, maxSegmentSize=1500, totalPackets="ALL", timeout=10, threadName="PacketHandler", bufferSize=2048):
         Thread.__init__(self)
         self.filename = filename
@@ -34,9 +27,9 @@ class ClientPacketHandler(Thread):
         self.bufferSize = bufferSize
 
     def run(self):
-        print("[%s] Generating packets", self.threadName)
+        print("Generating packets")
         packets = self.generate_packets()
-        print("[%s] Starting packet transmission", self.threadName)
+        print("Starting packet transmission")
         while (not self.window.empty() or
                 self.window.next() < self.totalPackets):
             if self.window.full():
@@ -51,7 +44,7 @@ class ClientPacketHandler(Thread):
                 singlePacket = SinglePacket(self.senderSocket, self.receiverIP, self.receiverPort, self.window, packet, self.timeout, threadName=threadName)
                 singlePacket.start()
 
-        print("[%s] Stopping packet transmission", self.threadName)
+        print("Stopping packet transmission")
         self.window.stop_transmission()
 
     def generate_packets(self):
@@ -82,16 +75,14 @@ class ClientPacketHandler(Thread):
         if (len(data) % 2) != 0:
             data += "0"
         sum = 0
+        intermedsum = 0
+
         for i in range(0, len(data), 2):
             data16 = ord(data[i]) + (ord(data[i+1]) << 8)
-            sum = self.carry_around_add(sum, data16)
+            intermedsum = sum + data16
+            sum = (intermedsum & 0xffff) + (intermedsum >> 16)
 
         return ~sum & 0xffff
-
-    def carry_around_add(self, sum, data16):
-        sum = sum + data16
-        return (sum & 0xffff) + (sum >> 16)
-
 
 class SinglePacket(Thread):
     def __init__(self, senderSocket, receiverIP, receiverPort, window, packet, timeout=10, threadName="Packet(?)"):
@@ -105,7 +96,7 @@ class SinglePacket(Thread):
         self.threadName = threadName
 
     def run(self):
-        print("[%s] Transmitting a packet with sequence number: %d", self.threadName, self.packet.SequenceNumber)
+        print("Transmitting a packet with sequence number: {}".format(self.packet.SequenceNumber))
         self.rdt_send(self.packet)
         self.window.start(self.packet.SequenceNumber)
 
@@ -113,7 +104,7 @@ class SinglePacket(Thread):
             timeLapsed = (time.time() - self.window.start_time(self.packet.SequenceNumber))
 
             if timeLapsed > self.timeout:
-                print("[%s] Retransmitting a packet with sequence number: %d", self.threadName, self.packet.SequenceNumber)
+                print("Retransmitting a packet with sequence number: {}".format(self.packet.SequenceNumber))
                 self.rdt_send(self.packet)
                 self.window.restart(self.packet.SequenceNumber)
 
@@ -122,13 +113,18 @@ class SinglePacket(Thread):
 
     def rdt_send(self, packet):
         if self.simulate_bit_error():
-            print("[%s] Simulating artificial bit error!!", self.threadName)
-            print("[%s] Injected bit error into a packet with sequence number: %d", self.threadName, packet.SequenceNumber)
+            print("Simulating artificial bit error!!")
+            print("Injected bit error into a packet with sequence number: {packet.SequenceNumber}".format())
             packet = self.alter_bits(packet)
 
         rawPacket = self.make_pkt(packet)
 
-        self.udt_send(rawPacket)
+        try:
+            with LOCK:
+                self.senderSocket.sendto(rawPacket, (self.receiverIP, self.receiverPort))
+        except Exception as e:
+            print("Could not send UDP packet!")
+            print("Sending UDP packet to {}:{} failed!".format(self.receiverIP, self.receiverPort))
 
     def simulate_bit_error(self):
         if random.randint(1, 10) <= 2:
@@ -144,9 +140,7 @@ class SinglePacket(Thread):
             alteredByte = ord(alteredData[randomByte]) & error
             alteredData[randomByte] = struct.pack("B", alteredByte)
         alteredData = "".join(alteredData)
-
         alteredPacket = ClientPacketHandler.PACKET(SequenceNumber=packet.SequenceNumber, Checksum=packet.Checksum, Data=alteredData)
-
         return alteredPacket
 
     def make_pkt(self, packet):
@@ -155,12 +149,3 @@ class SinglePacket(Thread):
         rawPacket = sequenceNumber + checksum + packet.Data
         return rawPacket
 
-    def udt_send(self, packet):
-        try:
-            with LOCK:
-                self.senderSocket.sendto(packet,
-                                         (self.receiverIP, self.receiverPort))
-        except Exception as e:
-            print("[%s] Could not send UDP packet!", self.threadName)
-            print("Sending UDP packet to %s:%d failed!" % (self.receiverIP, self.receiverPort))
-            raise Exception

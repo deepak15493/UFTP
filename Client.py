@@ -1,5 +1,4 @@
 import os
-
 from ClientSender import ClientSender
 
 class Client(object):
@@ -23,6 +22,6 @@ class Client(object):
             sender.close()
         except Exception as e:
             print('Exception Occurred')
-            raise  Exception
+            raise Exception
         finally:
             sender.close()

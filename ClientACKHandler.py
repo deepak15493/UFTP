@@ -1,5 +1,4 @@
 import random
-
 import struct
 import select
 import hashlib
@@ -39,7 +38,6 @@ class ClientACKHandler(Thread):
                 receivedAck, receiverAddress = self.senderSocket.recvfrom(self.bufferSize)
             except Exception as e:
                 print("Receiving UDP packet failed!")
-                raise Exception
 
             if receiverAddress[0] != self.receiverIP:
                 continue
@@ -48,35 +46,32 @@ class ClientACKHandler(Thread):
 
 
             if self.corrupt(receivedAck):
-                print("[%s] Received corrupt acknowledgement!!", self.threadName)
-                print("[%s] Discarding acknowledgement with ack number: %d", self.threadName, receivedAck.AckNumber)
+                print("Received corrupt acknowledgement!!")
+                print("Discarding acknowledgement with ack number: {}".format(receivedAck.AckNumber))
                 continue
 
             if not self.window.exist(receivedAck.AckNumber):
-                print("[%s] Received acknowledgement outside transmission window!!", self.threadName)
-                print("[%s] Discarding acknowledgement with ack number: %d", self.threadName, receivedAck.AckNumber)
+                print("Received acknowledgement outside transmission window!!")
+                print("Discarding acknowledgement with ack number: {}".format(receivedAck.AckNumber))
                 continue
 
             if self.simulate_ack_loss():
-                print("[%s] Simulating artificial acknowledgement loss!!", self.threadName)
-                print("[%s] Lost a acknowledgement with ack number: %d", self.threadName, receivedAck.AckNumber)
+                print("Simulating artificial acknowledgement loss!!")
+                print("Lost a acknowledgement with ack number: {}".format(receivedAck.AckNumber))
                 continue
 
-            print("[%s] Received acknowledgement with ack number: %d", self.threadName, receivedAck.AckNumber)
+            print("Received acknowledgement with ack number: {}".format(receivedAck.AckNumber))
             self.window.mark_acked(receivedAck.AckNumber)
 
     def parse(self, receivedAck):
         ackNumber = struct.unpack('=I', receivedAck[0:4])[0]
         checksum = struct.unpack('=16s', receivedAck[4:])[0]
-
         ack = ClientACKHandler.ACK(AckNumber=ackNumber, Checksum=checksum)
-
         return ack
 
     def corrupt(self, receivedAck):
         hashcode = hashlib.md5()
         hashcode.update(str(receivedAck.AckNumber))
-
         if hashcode.digest() != receivedAck.Checksum:
             return True
         else:
