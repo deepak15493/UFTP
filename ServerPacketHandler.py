@@ -42,7 +42,7 @@ class ServerPacketHandler(Thread):
                 if not self.window.receipt():
                     self.window.start_receipt()
             try:
-                receivedPacket, _ = self.receiverSocket.recvfrom(self.bufferSize)
+                receivedPacket, receivedAddr = self.receiverSocket.recvfrom(self.bufferSize)
             except Exception as e:
                 print("Receiving UDP packet failed!")
             receivedPacket = self.parse(receivedPacket)
