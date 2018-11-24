@@ -114,7 +114,7 @@ class SinglePacket(Thread):
     def rdt_send(self, packet):
         if self.simulate_bit_error():
             print("Simulating artificial bit error!!")
-            print("Injected bit error into a packet with sequence number: {packet.SequenceNumber}".format())
+            print("Injected bit error into a packet with sequence number: {}".format(packet.SequenceNumber))
             packet = self.alter_bits(packet)
 
         rawPacket = self.make_pkt(packet)
