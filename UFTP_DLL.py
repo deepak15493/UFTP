@@ -9,6 +9,9 @@ def Client_JTI(data_bin):
 def Client_InitTree():
     return libUFTPC.InitDirTree()
 
+def Client_StringAt(rqpath):
+    return string_at(rqpath)
+
 def Client_PDT():
     return libUFTPC.purgeDirTree()
 
@@ -24,8 +27,11 @@ def Client_LS():
 def Server_FJB(data,final_tree):
     return libUFTPS.fetchJSONBuffer(data,final_tree)
 
-def Server_JTB()
+def Server_JTB():
     return libUFTPS.JSONTreeBuild()
 
 def Server_PDT():
     return libUFTPS.purgeJSONTree()
+
+def Server_StringAt(rqpath):
+    return string_at(rqpath)

@@ -43,7 +43,7 @@ def UFTPC_CLI():
             #get command
             rqpath1 = "GET " + CLI_Class.rqpath + "/" + CLI_Class.filename
             print(rqpath1)
-            
+
         #return command.encode("utf-8")
 
 #continuous loop for server parent thread
@@ -73,7 +73,7 @@ def UFTP_Client():
     socket_info = UFTPC_Get_Socket()
     print(socket_info[0])
     rqpath = UFTP_DLL.Client_InitTree()
-    rqpathptr = string_at(rqpath).decode("utf-8")
+    rqpathptr = UFTP_DLL.Client_StringAt(rqpath).decode("utf-8")
     UFTPC_Init_Tree(socket_info,rqpathptr)
     #make threads for send/rcv?
     UFTPC_Send(socket_info)

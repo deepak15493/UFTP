@@ -29,10 +29,10 @@ class CLI(cmd.Cmd):
         ##returns rqpath (current directory)
         ##if not null, append filename to current rqpath
         ##create new buffer with new rqpath (absolute path of file)
-        
-        if(UFTP_DLL.Client_Get(filename) != NULL)
+
+        if(UFTP_DLL.Client_Get(filename) != NULL):
             return 3 # GET command success
-        else
+        else:
             print("File does not exist.")
             return 1 # ERROR
 
@@ -47,7 +47,7 @@ class CLI(cmd.Cmd):
             return 1
         #print(libUFTP.changeDir(path))
         retVal = UFTP_DLL.Client_CD(path.encode("utf-8"))
-        print("changeDir returned a " + str(retVal) 
+        print("changeDir returned a " + str(retVal))
         return retVal # SUCCESS; no further action
         # call JSON Function for cd
         # check return value of JSON function
