@@ -25,11 +25,11 @@ struct dirTreeNode_t{
 
 typedef struct dirTreeNode_t dirTreeNode;
 
-static void* garbagecollect[256];
+static void* garbagecollect[2048];
 
 static struct jsontree_object final_tree;
 
-static void* jsongarbagecollect[512];
+static void* jsongarbagecollect[2048];
 
 static char path[2048];
 
@@ -197,7 +197,7 @@ DLLIMPORT void purgeJSONTree(){
 DLLIMPORT void* JSONTreeBuild()
 {
 	
-	memset(garbagecollect,0,256*sizeof(void*));
+	memset(garbagecollect,0,2048*sizeof(void*));
 	
 	dirTreeRoot = (dirTreeNode *)malloc(sizeof(dirTreeNode));
 	

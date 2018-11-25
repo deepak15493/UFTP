@@ -25,7 +25,7 @@ struct dirTreeNode_t{
 
 typedef struct dirTreeNode_t dirTreeNode;
 
-void* garbagecollect[256];
+void* garbagecollect[2048];
 
 static dirTreeNode * dirTreeRoot;
 
@@ -298,7 +298,7 @@ DLLIMPORT int changeDir(void* subDir){ //Call this from the Python file when the
 DLLIMPORT void* InitDirTree()
 {
 	
-	memset(garbagecollect,0,256*sizeof(void*));
+	memset(garbagecollect,0,2048*sizeof(void*));
 	
 	dirTreeRoot = (dirTreeNode *)malloc(sizeof(dirTreeNode));
 	

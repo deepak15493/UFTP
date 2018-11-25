@@ -1,15 +1,15 @@
-# Project: ServerJSONStuff
+# Project: ClientJSONStuff
 # Makefile created by Dev-C++ 5.4.0
 
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = serverperprocessmodules.o dirent.o s_JSONTreeBuild.o jsontree.o $(RES)
-LINKOBJ  = serverperprocessmodules.o dirent.o s_JSONTreeBuild.o jsontree.o $(RES)
+OBJ      = jsonparse.o JSONTreeBuild.o $(RES)
+LINKOBJ  = jsonparse.o JSONTreeBuild.o $(RES)
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc --no-export-all-symbols --add-stdcall-alias  -g3
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"."
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"."
-BIN      = ServerJSONStuff.dll
+BIN      = ClientJSONStuff.dll
 CXXFLAGS = $(CXXINCS) -DBUILDING_DLL=1 -g3
 CFLAGS   = $(INCS) -DBUILDING_DLL=1 -g3
 RM       = rm -f
@@ -23,20 +23,14 @@ clean: clean-custom
 	${RM} $(OBJ) $(BIN)
 
 DLLWRAP=dllwrap.exe
-DEFFILE=libServerJSONStuff.def
-STATICLIB=libServerJSONStuff.a
+DEFFILE=libClientJSONStuff.def
+STATICLIB=libClientJSONStuff.a
 
 $(BIN): $(LINKOBJ)
 	$(DLLWRAP) --output-def $(DEFFILE) --implib $(STATICLIB) $(LINKOBJ) $(LIBS) -o $(BIN)
 
-serverperprocessmodules.o: serverperprocessmodules.c
-	$(CC) -c serverperprocessmodules.c -o serverperprocessmodules.o $(CFLAGS)
+jsonparse.o: jsonparse.c
+	$(CC) -c jsonparse.c -o jsonparse.o $(CFLAGS)
 
-dirent.o: dirent.c
-	$(CC) -c dirent.c -o dirent.o $(CFLAGS)
-
-s_JSONTreeBuild.o: s_JSONTreeBuild.c
-	$(CC) -c s_JSONTreeBuild.c -o s_JSONTreeBuild.o $(CFLAGS)
-
-jsontree.o: jsontree.c
-	$(CC) -c jsontree.c -o jsontree.o $(CFLAGS)
+JSONTreeBuild.o: JSONTreeBuild.c
+	$(CC) -c JSONTreeBuild.c -o JSONTreeBuild.o $(CFLAGS)

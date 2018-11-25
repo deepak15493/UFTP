@@ -155,7 +155,7 @@ json_putchar(int c)
 		jsonReturnBuf[j] = 0; //Clear content till we reach the parent subdir label
 	}
 	outbuf_pos = j+1;
-	jsonctx.depth--; //Decrement one level
+	//jsonctx.depth--; //Decrement one level
 	jsonReturnBuf[outbuf_pos] ='}'; //Don't put the contents of this subdir in just yet
 	outbuf_pos+=1;
 	return -1;
