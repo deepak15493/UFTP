@@ -90,7 +90,7 @@ def UFTP_Client():
 if __name__ == "__main__":
     try:
         CLI_Class = CLI.CLI()
-        flag = input("Debug? y/n").lower()
+        flag = input("Debug? <y/n>  ").lower()
         if(flag == 'y'):
             debug=1
             CLI_Class.debug = 1
