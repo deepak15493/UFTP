@@ -8,95 +8,103 @@ else:
 
 import cmd
 import UFTP_DLL
+import sys
+
 
 class CLI(cmd.Cmd):
     prompt = "\n$ "
-    intro = "Please select a file to download.  Use standard Linux commands to navigate the file hierarchy.\nType 'help' for a list of commands.  "
+    intro = ""
     g_path = "~/"
     rqpath = ""
+    retVal = -1
+    debug = 0
 
-    def checkArg(self, arg):
-        if(" " in arg):
-            print("Path must not contain spaces.")
-            return ""
-        return arg
 #-------------------------------------------------------------------
     def do_get(self, filename):
         """get [file]
         Get the selected file"""
-        print('Getting selected file.')
+        if self.debug : print('Getting selected file.')
         #filepath check with .dll code libUFTP.getCommand(filename)
         ##returns rqpath (current directory)
         ##if not null, append filename to current rqpath
         ##create new buffer with new rqpath (absolute path of file)
 
         if(UFTP_DLL.Client_Get(filename) != NULL):
-            return 3 # GET command success
+            self.retVal = 3 # GET command success
         else:
             print("File does not exist.")
-            return 1 # ERROR
+            self.retVal = 1 # ERROR
 
     def do_cd(self, path):
         """cd [path]
         Change Directory to the path specified"""
-        # path = self.checkArg(path)
-        # print("path = ", path)
-        print(path)
         if len(path) < 1:
             print("No path given")
-            return 1
-        #print(libUFTP.changeDir(path))
+            self.retVal = 1
+            return True
         retVal = UFTP_DLL.Client_CD(path.encode("utf-8"))
-        print("changeDir returned a " + str(retVal))
-        return retVal # SUCCESS; no further action
+        if self.debug : print("changeDir returned a " + str(retVal))
+        if(retVal == 1):
+            print("Not a valid path.")
+        self.retVal = retVal # SUCCESS; no further action
         # call JSON Function for cd
         # check return value of JSON function
         # 0 : success
         # 1 : error, directory does not exist
         # 2 : send something to server
 
-    def do_pwd(self, arg):
-        """pwd
-        Prints the path of the current Working Directory"""
-        print("path = ", self.g_path)
+    # def do_pwd(self, arg):
+    #     """pwd
+    #     Prints the path of the current Working Directory"""
+    #     print("path = ", self.g_path)
 
     def do_ls(self,arg):
         """ls
         List the contnets of the current directory"""
         UFTP_DLL.Client_LS()
-        return 0
+        self.retVal = 0
 
-    def do_config(self, arg):
-        """config
-        Configure IP addresses"""
-        clientIP = input("\tWhat is the client's IP: ")
-        serverIP = input("\tWhat is the server's IP: ")
+    # def do_retVal(self, arg):
+    #     """retVal
+    #     print the retVal"""
+    #     print(self.retVal)
 #-------------------------------------------------------------------
     def preloop(self):
+        if self.debug : print("In preloop")
+        self.retVal = -1
         pass
         # print("Exiting the CLI...")
 
     def do_close(self, arg):
         """close
         Exits the CLI program"""
+        sys.exit()
         return True
 
     def do_quit(self, arg):
         """quit
         Exits the CLI program"""
+        sys.exit()
         return True
 
     def do_exit(self, arg):
         """exit
         Exits the CLI program"""
+        sys.exit()
         return True
 
     def do_EOF(self, line):
         return True
 
+    def postcmd(self, arg1, arg2):
+        if self.debug : print("In postcmd")
+        # print("arg1 = " + str(arg1))
+        # print("arg2 = " + str(arg2))
+        return True
+
     def postloop(self):
         #libUFTP.purgeDirTree()
-        print("Exiting the cmd post loop...")
+        if self.debug : print("Exiting the cmd post loop...")
 
 
 if __name__ == '__main__':
