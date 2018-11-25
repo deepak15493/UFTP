@@ -30,7 +30,7 @@ class CLI(cmd.Cmd):
         ##if not null, append filename to current rqpath
         ##create new buffer with new rqpath (absolute path of file)
 
-        if(UFTP_DLL.Client_Get(filename) != NULL):
+        if(UFTP_DLL.Client_Get(filename.encode("utf-8")) != 0):
             self.retVal = 3 # GET command success
             self.filename = filename
             print("Requesting " + self.filename + " from server")

@@ -66,8 +66,8 @@ def UFTPC_Send(socket_info,msg):
     jtiRetVal = UFTP_DLL.Client_JTI(data.encode("utf-8"))
     if debug : print(jtiRetVal)
 
-def UFTPC_Init_Tree(socket_info,rqpath):
-    rqpath1 = "DGET " + rqpath + "/"
+def UFTPC_Init_Tree(socket_info,rqpathptr):
+    rqpath1 = "DGET " + rqpathptr + "/"
     if debug : print(rqpath1)
     UFTPC_Send(socket_info,rqpath1)
 
