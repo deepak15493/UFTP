@@ -35,6 +35,9 @@ def UFTPC_CLI(socket_info):
         #return serialized valid CLI command to send over socket
         if debug : print("After CLI_Class.cmdloop()")
         if debug : print("return_code = " + str(return_code))
+        rqpathptr = UFTP_DLL.Client_GetPath()
+        rqpath = UFTP_DLL.Client_StringAt(rqpathptr).decode("utf-8")
+        if debug : print("PYTHON rqpath = " + rqpath)
         if return_code == -1:
             #success
             pass
@@ -46,12 +49,12 @@ def UFTPC_CLI(socket_info):
             pass
         if return_code == 2:
             #run DGET again b/c directory is empty
-            rqpath1 = "DGET " + CLI_Class.rqpath + "/"
+            rqpath1 = "DGET " + rqpath + "/"
             if debug : print(rqpath1)
             UFTPC_Send(socket_info, rqpath1)
         if return_code == 3:
             #get command
-            rqpath1 = "GET " + CLI_Class.rqpath + "/" + CLI_Class.filename
+            rqpath1 = "GET " + rqpath + "/" + CLI_Class.filename
             if debug : print(rqpath1)
             UFTPC_Send(socket_info, rqpath1)
 

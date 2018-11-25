@@ -24,6 +24,9 @@ def Client_CD(path):
 def Client_LS():
     return libUFTPC.listDir()
 
+def Client_GetPath():
+    return libUFTPC.getrqpath()
+
 def Server_FJB(data,final_tree):
     return libUFTPS.fetchJSONBuffer(data,final_tree)
 

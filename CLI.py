@@ -15,7 +15,6 @@ class CLI(cmd.Cmd):
     prompt = "\n$ "
     intro = ""
     g_path = "~/"
-    rqpath = ""
     filename = ""
     retVal = -1
     debug = 0
