@@ -296,7 +296,7 @@ DLLIMPORT int changeDir(void* subDir){ //Call this from the Python file when the
 	return 0;
 }
 
-void* getrqpath()
+DLLIMPORT void* getrqpath()
 {
 	return (void*)(rqpath);
 }

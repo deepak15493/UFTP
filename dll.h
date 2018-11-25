@@ -16,6 +16,6 @@ DLLIMPORT int JSONTreeInterpret(void* JSONTreeBuf);
 DLLIMPORT void listDir(void);
 DLLIMPORT int changeDir(void* subDir);
 DLLIMPORT void* InitDirTree(void);
-
+DLLIMPORT void* getrqpath(void);
 
 #endif /* _DLL_H_ */
