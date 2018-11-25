@@ -3,9 +3,8 @@ import traceback
 import UFTP_Sockets
 import threading
 import CLI
-from ctypes import *
+import UFTP_DLL
 
-libUFTP = CDLL("./ClientJSONStuff.dll")
 #get socket info from user input
 def UFTPC_Get_Socket():
     server_IP = input("Server IP Address: ")
@@ -21,6 +20,7 @@ def UFTPC_CLI():
     #CLI_Class = CLI.CLI()
     while(True):
         return_code = CLI_Class.cmdloop()
+        #return codes 0-2 reserved for Directory Commands
         #return serialized valid CLI command to send over socket
         if return_code == 0:
             #success
@@ -38,8 +38,12 @@ def UFTPC_CLI():
             UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],rqpath1.encode("utf-8"))
             data,addr = UFTP_Sockets.Socket_Rcv(socket_info[0])
             print("Received : " + data + " from " + addr[0] + ":" + str(addr[1]))
-            print(libUFTP.JSONTreeInterpret(data.encode("utf-8")))
-            pass
+            print(UFTP_DLL.Client_JTI(data.encode("utf-8")))
+        if return_code == 3:
+            #get command
+            rqpath1 = "GET " + CLI_Class.rqpath + "/" + CLI_Class.filename
+            print(rqpath1)
+            
         #return command.encode("utf-8")
 
 #continuous loop for server parent thread
@@ -57,7 +61,7 @@ def UFTPC_Init_Tree(socket_info,rqpath):
     UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],rqpath1.encode("utf-8"))
     data,addr = UFTP_Sockets.Socket_Rcv(socket_info[0])
     print("Received : " + data + " from " + addr[0] + ":" + str(addr[1]))
-    print(libUFTP.JSONTreeInterpret(data.encode("utf-8")))
+    print(UFTP_DLL.Client_JTI(data.encode("utf-8")))
 
 def UFTPC_Receive():
     while(True):
@@ -68,7 +72,7 @@ def UFTP_Client():
     #when client starts up: request server IP/UDP Port and establish socket
     socket_info = UFTPC_Get_Socket()
     print(socket_info[0])
-    rqpath = CLI_Class.initTree()
+    rqpath = UFTP_DLL.Client_InitTree()
     rqpathptr = string_at(rqpath).decode("utf-8")
     UFTPC_Init_Tree(socket_info,rqpathptr)
     #make threads for send/rcv?
@@ -84,7 +88,7 @@ if __name__ == "__main__":
         print('Quit the Thread.\n\n')
         sys.exit()
     except KeyboardInterrupt:
-        libUFTP.purgeDirTree()
+        UFTP_DLL.Client_PDT()
         print("Purging dir tree and exiting")
         raise
     except Exception as e:

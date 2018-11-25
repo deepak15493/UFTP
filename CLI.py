@@ -7,8 +7,7 @@ else:
     readline.parse_and_bind('tab: complete')
 
 import cmd
-from ctypes import *
-libUFTP = CDLL("./ClientJSONStuff.dll")
+import UFTP_DLL
 
 class CLI(cmd.Cmd):
     prompt = "\n$ "
@@ -21,15 +20,21 @@ class CLI(cmd.Cmd):
             print("Path must not contain spaces.")
             return ""
         return arg
-    def initTree(self):
-        #client-side code to create initial client path object
-        return libUFTP.InitDirTree()
 #-------------------------------------------------------------------
-    def do_get(self, person):
+    def do_get(self, filename):
         """get [file]
         Get the selected file"""
         print('Getting selected file.')
-        return 0
+        #filepath check with .dll code libUFTP.getCommand(filename)
+        ##returns rqpath (current directory)
+        ##if not null, append filename to current rqpath
+        ##create new buffer with new rqpath (absolute path of file)
+        
+        if(UFTP_DLL.Client_Get(filename) != NULL)
+            return 3 # GET command success
+        else
+            print("File does not exist.")
+            return 1 # ERROR
 
     def do_cd(self, path):
         """cd [path]
@@ -41,7 +46,9 @@ class CLI(cmd.Cmd):
             print("No path given")
             return 1
         #print(libUFTP.changeDir(path))
-        print(libUFTP.changeDir(path.encode("utf-8")))
+        retVal = UFTP_DLL.Client_CD(path.encode("utf-8"))
+        print("changeDir returned a " + str(retVal) 
+        return retVal # SUCCESS; no further action
         # call JSON Function for cd
         # check return value of JSON function
         # 0 : success
@@ -56,7 +63,8 @@ class CLI(cmd.Cmd):
     def do_ls(self,arg):
         """ls
         List the contnets of the current directory"""
-        libUFTP.listDir()
+        UFTP_DLL.Client_LS()
+        return 0
 
     def do_config(self, arg):
         """config
