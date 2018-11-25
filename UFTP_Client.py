@@ -29,10 +29,19 @@ def UFTPC_CLI():
             #error, directory DNE
             break
         if return_code == 2:
-            #
+            #run DGET again b/c directory is empty
+            rqpath1 = "DGET " + CLI_Class.rqpath + "/"
+            print(rqpath1)
+            socket_info = UFTPC_Get_Socket()
+            socket_info[0].bind(('',0))
+            client_send_port = socket_info[0].getsockname()[1]
+            UFTP_Sockets.Socket_Send(socket_info[0],socket_info[1],socket_info[2],rqpath1.encode("utf-8"))
+            data,addr = UFTP_Sockets.Socket_Rcv(socket_info[0])
+            print("Received : " + data + " from " + addr[0] + ":" + str(addr[1]))
+            print(libUFTP.JSONTreeInterpret(data.encode("utf-8")))
             pass
         #return command.encode("utf-8")
-    
+
 #continuous loop for server parent thread
 def UFTPC_Send(socket_info):
     UFTPC_CLI()
@@ -49,7 +58,7 @@ def UFTPC_Init_Tree(socket_info,rqpath):
     data,addr = UFTP_Sockets.Socket_Rcv(socket_info[0])
     print("Received : " + data + " from " + addr[0] + ":" + str(addr[1]))
     print(libUFTP.JSONTreeInterpret(data.encode("utf-8")))
-    
+
 def UFTPC_Receive():
     while(True):
         #wait for server response on socket
@@ -65,7 +74,7 @@ def UFTP_Client():
     #make threads for send/rcv?
     UFTPC_Send(socket_info)
     #UFTPC_Receive()
-    
+
 if __name__ == "__main__":
     try:
         CLI_Class = CLI.CLI()
@@ -80,7 +89,7 @@ if __name__ == "__main__":
         raise
     except Exception as e:
         print ("Error!")
-        print(e) 
+        print(e)
         print('-' * 60)
         traceback.print_exc(file=sys.stdout)
         print('-' * 60)

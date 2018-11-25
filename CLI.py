@@ -15,7 +15,7 @@ class CLI(cmd.Cmd):
     intro = "Please select a file to download.  Use standard Linux commands to navigate the file hierarchy.\nType 'help' for a list of commands.  "
     g_path = "~/"
     rqpath = ""
-    
+
     def checkArg(self, arg):
         if(" " in arg):
             print("Path must not contain spaces.")
@@ -25,13 +25,11 @@ class CLI(cmd.Cmd):
         #client-side code to create initial client path object
         return libUFTP.InitDirTree()
 #-------------------------------------------------------------------
-    def do_greet(self, person):
-        """greet [person]
-        Greet the named person"""
-        if person:
-            print("hi,", person)
-        else:
-            print('hi')
+    def do_get(self, person):
+        """get [file]
+        Get the selected file"""
+        print('Getting selected file.')
+        return 0
 
     def do_cd(self, path):
         """cd [path]
