@@ -292,6 +292,7 @@ DLLIMPORT int changeDir(void* subDir){ //Call this from the Python file when the
 	{
 		return 1; //If this is returned to the Python script, then print error message saying that the dir doesn't exist
 	}
+	printf("%s",rqpath);
 	return 0;
 }
 
