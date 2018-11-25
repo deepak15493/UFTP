@@ -16,6 +16,7 @@ class CLI(cmd.Cmd):
     intro = ""
     g_path = "~/"
     rqpath = ""
+    filename = ""
     retVal = -1
     debug = 0
 
@@ -31,6 +32,8 @@ class CLI(cmd.Cmd):
 
         if(UFTP_DLL.Client_Get(filename) != NULL):
             self.retVal = 3 # GET command success
+            self.filename = filename
+            print("Requesting " + self.filename + " from server")
         else:
             print("File does not exist.")
             self.retVal = 1 # ERROR

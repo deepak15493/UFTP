@@ -53,6 +53,7 @@ def UFTPC_CLI(socket_info):
             #get command
             rqpath1 = "GET " + CLI_Class.rqpath + "/" + CLI_Class.filename
             if debug : print(rqpath1)
+            UFTPC_Send(socket_info, rqpath1)
 
         #return command.encode("utf-8")
 
