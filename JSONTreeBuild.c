@@ -170,6 +170,7 @@ static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 				tempParent->children[tk] = newNode;
 				tempParent->numchildren +=1;
 				if(cJSONTreeBuf[js.vstart + js.vlen + 3] != '"'){
+					type = jsonparse_next(&js);
 					continue;
 				}
 				volatile unsigned int tempLen = strlen(dirpath);
