@@ -20,17 +20,29 @@ def UFTP_Server_Parent():
 
 def UFTP_Server_Child(sock,server_IP,server_Port):
     sock.bind((server_IP,server_Port))
-    while(True):
-        data,addr = UFTP_Sockets.Socket_Rcv(sock)
-        if addr not in addressList:
-            #new client
-            print("new client at : ", addr)
-            addressList.append(addr)
-        if data.startswith("DGET",0,4):
-            print(data.split("DGET ")[1])
-            jsonpayload = UFTP_DLL.Server_StringAt(UFTP_DLL.Server_FJB(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
-            print(jsonpayload)
-            UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],jsonpayload.encode("utf-8"))
+    print("Waiting for message from client(s)")
+    try:
+        while(True):
+            try:
+                sock.settimeout(2)
+                data,addr = UFTP_Sockets.Socket_Rcv(sock)
+            except UFTP_Sockets.socket.timeout:
+                print(".",end='',flush=True)
+                continue
+            if addr not in addressList:
+                #new client
+                print("new client at :", addr)
+                addressList.append(addr)
+            if data.startswith("DGET",0,4):
+                print("got DGET for:",data.split("DGET ")[1])
+                jsonpayload = UFTP_DLL.Server_StringAt(UFTP_DLL.Server_FJB(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
+                print(jsonpayload)
+                UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],jsonpayload.encode("utf-8"))
+            if data.startswith("GET",0,3):
+                print("got GET for:",data.split("GET ")[1])
+                UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],"here is your file".encode("utf-8"))
+    except KeyboardInterrupt:
+        raise
         #check for socket input
             #if directory exploration command
                 #look up JSON tree
@@ -53,11 +65,14 @@ if __name__ == "__main__":
         sys.exit(UFTP_Server_Parent())
     except SystemExit:
         print('Quit the Thread.\n\n')
+        UFTP_DLL.Server_PDT()
+        print("Purging JSON Tree and exiting")
         sys.exit()
     except KeyboardInterrupt:
-        Server_PDT()
+        print("^C")
+        UFTP_DLL.Server_PDT()
         print("Purging JSON Tree and exiting")
-        raise
+        sys.exit()
     except Exception as e:
         print ("Error!")
         print(e)

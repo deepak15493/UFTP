@@ -109,9 +109,10 @@ if __name__ == "__main__":
         print("Purging dir tree and exiting.\n\n")
         sys.exit()
     except KeyboardInterrupt:
+        print("^C")
         UFTP_DLL.Client_PDT()
         print("Purging dir tree and exiting\n\n")
-        raise
+        sys.exit()
     except Exception as e:
         print ("Error!")
         print(e)

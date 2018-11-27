@@ -1,3 +1,4 @@
+import sys
 try:
     import readline
 except ImportError:
@@ -8,7 +9,7 @@ else:
 
 import cmd
 import UFTP_DLL
-import sys
+
 
 
 class CLI(cmd.Cmd):
