@@ -68,11 +68,11 @@ find_json_path(struct jsontree_context *json, char *path)
 static int
 json_putchar(int c)
 {
-  if(outbuf_pos < 16384) {
+  if(outbuf_pos < 16382) {
 	jsonReturnBuf[outbuf_pos] = c;
 	outbuf_pos+=1;
 	if((c == '{')){
-		if((jsonctx.depth-jsonctx.path)>=1){
+		if(((jsonctx.depth-jsonctx.path)>=1) && ((jsonctx.depth-jsonctx.path)<=4)){
 			struct jsontree_object* v = (struct jsontree_object* )jsonctx.values[jsonctx.depth];
 			volatile unsigned int temp_len = 0;
 			volatile unsigned int k = 0;
@@ -88,7 +88,7 @@ json_putchar(int c)
 					temp_len += 2; //2 added for the flower brackets
 				}
 			}
-			temp_len += (v->count - 1); //Commas 
+			temp_len += (v->count); //Commas plus flower brace in the end
 			tdepth = jsonctx.depth - jsonctx.path;
 			do{
 				v = (struct jsontree_object* )jsonctx.values[(tdepth + jsonctx.path) - 1];
@@ -100,7 +100,7 @@ json_putchar(int c)
 				tdepth--;
 			}while(tdepth > 0);
 			
-			if(outbuf_pos + temp_len > 16383){//Putting the entire subdir content into the buffer would exceed our length limit.
+			if(outbuf_pos + temp_len > 16382){//Putting the entire subdir content into the buffer would exceed our length limit.
 				temp_len = 1; //Assume we're writing } to the buffer instead of the contents
 				tdepth = jsonctx.depth - jsonctx.path;
 				do{
@@ -112,7 +112,7 @@ json_putchar(int c)
 					temp_len += (k - (jsonctx.index[(tdepth + jsonctx.path) - 1])); //Add commas and final one flower brackets
 					tdepth--;
 				}while(tdepth > 0);
-				if(outbuf_pos + temp_len > 16383){
+				if(outbuf_pos + temp_len > 16382){
 					//Even putting an empty subdir into buffer is causing it to overflow. Just stop putting the parent subdir itself
 					volatile unsigned int j = 0;
 					volatile int breakNow = 0;
@@ -136,7 +136,11 @@ json_putchar(int c)
 				outbuf_pos+=1;
 				return -1;
 			}
-		}
+		}else if((jsonctx.depth-jsonctx.path)>4){
+				jsonReturnBuf[outbuf_pos] = '}'; //Don't put the contents of this subdir in just yet
+				outbuf_pos+=1;
+				return -1;
+			}
 	}
 	return c;
   }else{

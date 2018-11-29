@@ -21,6 +21,7 @@ struct dirTreeNode_t{
 	unsigned type;
 	unsigned int numchildren;
 	void* children[21];
+	char balreadyRequested;
 };
 
 typedef struct dirTreeNode_t dirTreeNode;
@@ -189,7 +190,11 @@ static int recursiveInterpret(void* dirpath,void* JSONTreeBuf)
 DLLIMPORT int JSONTreeInterpret(void* JSONTreeBuf)
 {
 	jsonparse_setup(&js, (const char *)JSONTreeBuf, strlen((const char *)JSONTreeBuf));
-	return recursiveInterpret((void*)(&rqpath[0]),JSONTreeBuf);
+	dirTreeNode *tempParent = GetNodeAddr((char*)(rqpath));
+	if(recursiveInterpret((void*)(&rqpath[0]),JSONTreeBuf) != 0)
+		return 1;
+	tempParent->balreadyRequested = 1;
+	return 0;
 }
 
 static void printDirTree(dirTreeNode *printtree,int tab){
@@ -231,7 +236,7 @@ DLLIMPORT int changeDir(void* subDir){ //Call this from the Python file when the
 			curTreeRoot = tempNode;
 			memset(rqpath,0,sizeof(rqpath));
 			strcpy(rqpath,temp);
-			if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
+			if((((dirTreeNode*)(curTreeRoot->children[0]))==NULL) && (!curTreeRoot->balreadyRequested)){//Dir is empty
 					return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
 			}
 		}
@@ -279,7 +284,7 @@ DLLIMPORT int changeDir(void* subDir){ //Call this from the Python file when the
 						strcat(rqpath,"/");
 						strncat(rqpath,temp,strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name));
 						curTreeRoot = (dirTreeNode*)(curTreeRoot->children[i]);
-						if(((dirTreeNode*)(curTreeRoot->children[0]))==NULL){//Dir is empty
+						if((((dirTreeNode*)(curTreeRoot->children[0]))==NULL) && (!curTreeRoot->balreadyRequested)){//Dir is empty
 							return 2; //If this is returned to the Python script, then send a request to server to get this subdir content
 						}
 						tempNode = 1;
