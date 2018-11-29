@@ -11,13 +11,20 @@ class Server(object):
         windowSize = 2
         path = os.path.join(os.getcwd(), 'Data', 'Receiver')
         timeout = 10
+        fileTemp = os.path.join(os.getcwd(), "Data", "Receiver")
+        file = file = os.path.join(fileTemp, fileName)
+        buffer = ""
 
         server = ServerReceiver(receiverIP, receiverPort, sequenceNumberBits, windowSize, path)
 
         try:
             server.open()
-            server.receive(fileName,senderIP,senderPort, timeout)
+            server.receive(fileName, senderIP, senderPort, timeout)
             server.close()
+            ####after completion of transfer data is read from transferred file and converted into string
+            with open(file, "rb") as f:
+                buffer = f.read()
+            print(buffer)
         except Exception as e:
             print('Exception Occurred')
         finally:
