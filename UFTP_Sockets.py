@@ -13,3 +13,6 @@ def Socket_Rcv(sock):
     data, addr = sock.recvfrom(16384)
     print("\nSocket Received:", data.decode("utf-8"))
     return(data.decode("utf-8"),addr)
+
+def Socket_PrintIP():
+    print("IP: " + socket.gethostbyname(socket.gethostname()))

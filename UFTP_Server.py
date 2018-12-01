@@ -20,6 +20,7 @@ def UFTP_Server_Parent():
 
 def UFTP_Server_Child(sock,server_IP,server_Port):
     sock.bind((server_IP,server_Port))
+    UFTP_Sockets.Socket_PrintIP()
     print("Waiting for message from client(s)")
     try:
         while(True):
