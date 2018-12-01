@@ -14,5 +14,7 @@ def Socket_Rcv(sock):
     print("\nSocket Received:", data.decode("utf-8"))
     return(data.decode("utf-8"),addr)
 
-def Socket_PrintIP():
-    print("IP: " + socket.gethostbyname(socket.gethostname()))
+def Socket_GetIP():
+    IP = socket.gethostbyname(socket.gethostname())
+    print("IP: " + IP)
+    return IP
