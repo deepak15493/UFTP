@@ -21,7 +21,7 @@ class Sender(object):
     #         print("Creating UDP socket {}:{} for communication with the server failed!".format(self.senderIP, self.senderPort))
     #         raise Exception
 
-    def send(self, filename, receiverIP="127.0.0.1", receiverPort=8080, totalPackets="ALL", timeout=10):
+    def send(self, filename, receiverIP, receiverPort, totalPackets="ALL", timeout=10):
         print("Transmitting file '{}' to the receiver".format(filename))
         filename = os.path.join(self.path, filename)
         if not os.path.exists(filename):
