@@ -10,15 +10,15 @@ class ReceiverPacketHandler(Thread):
     PACKET = namedtuple("Packet", ["SequenceNumber", "Checksum", "Data"])
     ACK = namedtuple("ACK", ["AckNumber", "Checksum"])
 
-    def __init__(self, fileHandle, receiverSocket, senderIP, senderPort, receiverIP, receiverPort, window, timeout=10,
+    def __init__(self, fileHandle, receiverSocket, window, timeout=10,
                  bufferSize=2048):
         Thread.__init__(self)
         self.fileHandle = fileHandle
         self.receiverSocket = receiverSocket
-        self.senderIP = senderIP
-        self.senderPort = senderPort
-        self.receiverIP = receiverIP
-        self.receiverPort = receiverPort
+        # self.senderIP = senderIP
+        # self.senderPort = senderPort
+        # self.receiverIP = receiverIP
+        # self.receiverPort = receiverPort
         self.window = window
         self.timeout = timeout
         self.bufferSize = bufferSize
@@ -42,7 +42,7 @@ class ReceiverPacketHandler(Thread):
                 if not self.window.receipt():
                     self.window.start_receipt()
             try:
-                receivedPacket, _ = self.receiverSocket.recvfrom(self.bufferSize)
+                receivedPacket, senderAddress = self.receiverSocket.recvfrom(self.bufferSize)
             except Exception as e:
                 print("Receiving UDP packet failed!")
             receivedPacket = self.parse(receivedPacket)
@@ -53,7 +53,7 @@ class ReceiverPacketHandler(Thread):
             if self.window.out_of_order(receivedPacket.SequenceNumber):
                 print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
                 print("Transmitting an acknowledgement with ack number: {}".format(receivedPacket.SequenceNumber))
-                self.rdt_send(receivedPacket.SequenceNumber)
+                self.rdt_send(receivedPacket.SequenceNumber, senderAddress)
                 continue
 
             if self.simulate_packet_loss():
@@ -69,7 +69,7 @@ class ReceiverPacketHandler(Thread):
                 print("Received packet with sequence number: {}".format(receivedPacket.SequenceNumber))
                 print("Transmitting an acknowledgement with ack number: {}".format(receivedPacket.SequenceNumber))
                 self.window.store(receivedPacket)
-                self.rdt_send(receivedPacket.SequenceNumber)
+                self.rdt_send(receivedPacket.SequenceNumber, senderAddress)
 
             if self.window.expected(receivedPacket.SequenceNumber):
                 self.deliver_packets()
@@ -92,7 +92,7 @@ class ReceiverPacketHandler(Thread):
     def checksum(self, data):
         if (len(data) % 2) != 0:
             data += "0"
-        intermedsum=0
+        intermedsum = 0
         sum = 0
         for i in range(0, len(data), 2):
             data16 = ord(data[i]) + (ord(data[i + 1]) << 8)
@@ -101,14 +101,14 @@ class ReceiverPacketHandler(Thread):
 
         return ~sum & 0xffff
 
-    def rdt_send(self, ackNumber):
+    def rdt_send(self, ackNumber, senderAddress):
         ack = ReceiverPacketHandler.ACK(AckNumber=ackNumber, Checksum=self.get_hashcode(ackNumber))
         rawAck = self.make_pkt(ack)
 
         try:
-            self.receiverSocket.sendto(rawAck, (self.senderIP, self.senderPort))
+            self.receiverSocket.sendto(rawAck, (senderAddress[0], senderAddress[1]))
         except Exception as e:
-            print("Sending UDP packet to {}:{} failed!".format(self.senderIP, self.senderPort))
+            print("Sending UDP packet to {}:{} failed!".format(senderAddress[0], senderAddress[1]))
 
     def get_hashcode(self, data):
         hashcode = hashlib.md5()

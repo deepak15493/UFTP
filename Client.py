@@ -26,7 +26,7 @@ class Client(object):
 
         try:
             sender.open()
-            sender.send(fileName, receiverIP, receiverPort, totalPackets, timeout)
+            sender.send(fileName, receiverIP, receiverPort)
             sender.close()
         except Exception as e:
             print('Exception Occurred')

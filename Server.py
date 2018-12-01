@@ -7,19 +7,16 @@ class Server(object):
         senderPort = 8081
         receiverIP = '127.0.0.1'
         receiverPort = 8080
-        sequenceNumberBits = 2
-        windowSize = 2
-        path = os.path.join(os.getcwd(), 'Data', 'Receiver')
         timeout = 10
         fileTemp = os.path.join(os.getcwd(), "Data", "Receiver")
         file = file = os.path.join(fileTemp, fileName)
         buffer = ""
 
-        server = Receiver(receiverIP, receiverPort, sequenceNumberBits, windowSize, path)
+        server = Receiver(receiverIP, receiverPort)
 
         try:
             server.open()
-            server.receive(fileName, senderIP, senderPort, timeout)
+            server.receive(fileName, senderIP, senderPort)
             server.close()
             ####after completion of transfer data is read from transferred file and converted into string
             with open(file, "rb") as f:
