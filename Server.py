@@ -1,5 +1,5 @@
 import os
-from ServerReceiver import ServerReceiver
+from Receiver import Receiver
 
 class Server(object):
         fileName = 'temp.txt'
@@ -15,7 +15,7 @@ class Server(object):
         file = file = os.path.join(fileTemp, fileName)
         buffer = ""
 
-        server = ServerReceiver(receiverIP, receiverPort, sequenceNumberBits, windowSize, path)
+        server = Receiver(receiverIP, receiverPort, sequenceNumberBits, windowSize, path)
 
         try:
             server.open()
