@@ -21,7 +21,7 @@ class Receiver(object):
     #     except Exception as e:
     #         print("Creating UDP socket {}:{} for communication with the client failed!".format(self.receiverIP, self.receiverPort))
 
-    def receive(self, filename, senderIP="127.0.0.1", senderPort=8081, timeout=10):
+    def receive(self, filename, timeout=10):
         filename = os.path.join(self.path, filename)
         try:
             self.fileHandle = open(filename, "wb")
