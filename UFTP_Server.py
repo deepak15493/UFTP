@@ -1,7 +1,6 @@
 import sys
 import traceback
 import UFTP_Sockets
-import sys
 import UFTP_DLL
 import time
 addressList = []
@@ -40,8 +39,10 @@ def UFTP_Server_Child(sock,server_IP,server_Port):
                 print(jsonpayload)
                 UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],jsonpayload.encode("utf-8"))
             if data.startswith("GET",0,3):
-                print("got GET for:",data.split("GET ")[1])
-                UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],"here is your file".encode("utf-8"))
+                fpath = data.split("GET ")[1]
+                print("got GET for:",fpath)
+                UFTP_Sockets.Send_File(sock,addr[0],addr[1],fpath)
+                #UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],"here is your file".encode("utf-8"))
     except KeyboardInterrupt:
         raise
         #check for socket input
