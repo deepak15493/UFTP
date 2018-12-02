@@ -59,7 +59,7 @@ class ReceiverPacketHandler(Thread):
                 #continue
 
             if self.window.out_of_order(receivedPacket.SequenceNumber):
-                print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
+                #print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
                 print("Transmitting an acknowledgement with ack number: {}".format(receivedPacket.SequenceNumber))
                 self.rdt_send(receivedPacket.SequenceNumber, senderAddress)
                 continue
