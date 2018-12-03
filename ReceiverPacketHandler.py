@@ -72,7 +72,7 @@ class ReceiverPacketHandler(Thread):
 
             if self.window.exist(receivedPacket.SequenceNumber):
                 print("Received duplicate packet!!")
-                print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
+                #print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
                 continue
             else:
                 print("Received packet with sequence number: {}".format(receivedPacket.SequenceNumber))
