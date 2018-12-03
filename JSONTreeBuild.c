@@ -116,7 +116,7 @@ DLLIMPORT void* getCommand(void* filename){//Only check if the filename is valid
 		for(i=0;i<20;i++)
 		{
 			if(curTreeRoot->children[i]){
-				if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(temp))==0)
+				if(strncmp(((dirTreeNode*)(curTreeRoot->children[i]))->name,temp,strlen(((dirTreeNode*)(curTreeRoot->children[i]))->name))==0)
 				{
 					return (void*)(rqpath);
 				}
