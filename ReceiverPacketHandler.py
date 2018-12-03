@@ -52,7 +52,7 @@ class ReceiverPacketHandler(Thread):
                 if not self.window.receipt():
                     self.window.start_receipt()
             try:
-                print("calling UFTP_Sockets.Socket_Rcv()")
+                if self.debug: print("calling UFTP_Sockets.Socket_Rcv()")
                 receivedPacket, senderAddress = UFTP_Sockets.Socket_Rcv(self.receiverSocket,self.bufferSize)
                 self.senderAddr = senderAddress
                 if self.debug: print("receivedPacket: ",receivedPacket)

@@ -27,36 +27,37 @@ def UFTP_Server_Parent():
 
 def UFTP_Server_Child(sock,server_IP,server_Port):
     sock.bind((server_IP,server_Port))
-    print("Waiting for message from client(s)")
-    #try:
-        #while(True):
-            #try:
-                #sock.settimeout(2)
-                #data,addr = UFTP_Sockets.Socket_Rcv(sock)
-                #clientIP = addr[0]
-                #clientPort = addr[1]
-                #call selRep receive
-    data, addr = UFTP_SR.SR_Receiver(sock,debug)
-    clientIP = addr[0]
-    clientPort = addr[1]
-    if debug: print("SR code done, got: ",data)
-            #except UFTP_Sockets.socket.timeout:
-                #print(".",end='',flush=True)
-                #continue
-    if addr not in addressList:
-                #new client
-        print("New Client at :", addr)
-        addressList.append(addr)
-    if data.startswith("DGET",0,4):
-        print("got DGET for:",data.split("DGET ")[1])
-        jsonpayload = UFTP_DLL.Server_StringAt(UFTP_DLL.Server_FJB(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
-        if debug: print(jsonpayload)
-                #call selRep send
-        UFTP_SR.SR_Sender(sock,clientIP,clientPort,jsonpayload.encode("utf-8"),debug)
-    if data.startswith("GET",0,3):
-        fpath = data.split("GET ")[1]
-        print("got GET for:",fpath)
-        Send_File(sock,clientIP,clientPort,fpath)
+    while(True):
+        print("Waiting for message from client(s)")
+        #try:
+            #while(True):
+                #try:
+                    #sock.settimeout(2)
+                    #data,addr = UFTP_Sockets.Socket_Rcv(sock)
+                    #clientIP = addr[0]
+                    #clientPort = addr[1]
+                    #call selRep receive
+        data, addr = UFTP_SR.SR_Receiver(sock,debug)
+        clientIP = addr[0]
+        clientPort = addr[1]
+        if debug: print("SR code done, got: ",data)
+                #except UFTP_Sockets.socket.timeout:
+                    #print(".",end='',flush=True)
+                    #continue
+        if addr not in addressList:
+                    #new client
+            print("New Client at :", addr)
+            addressList.append(addr)
+        if data.startswith("DGET",0,4):
+            print("got DGET for:",data.split("DGET ")[1])
+            jsonpayload = UFTP_DLL.Server_StringAt(UFTP_DLL.Server_FJB(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
+            if debug: print(jsonpayload)
+                    #call selRep send
+            UFTP_SR.SR_Sender(sock,clientIP,clientPort,jsonpayload.encode("utf-8"),debug)
+        if data.startswith("GET",0,3):
+            fpath = data.split("GET ")[1]
+            print("got GET for:",fpath)
+            Send_File(sock,clientIP,clientPort,fpath)
                 #UFTP_Sockets.Socket_Send(sock,addr[0],addr[1],"here is your file".encode("utf-8"))
     #except KeyboardInterrupt:
         #raise
