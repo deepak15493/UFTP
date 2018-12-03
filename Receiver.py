@@ -26,7 +26,7 @@ class Receiver(object):
         filename = os.path.join(self.path, filename)
         if self.debug: print("Receiver.receive() filename: ",filename)
         try:
-            self.fileHandle = open(filename, "wb")
+            self.fileHandle = open(filename, "w")
         except IOError as e:
             print("Creating a file handle failed! Filename: {}".format(filename))
 

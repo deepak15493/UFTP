@@ -53,11 +53,12 @@ class SenderPacketHandler(Thread):
     def generate_packets(self):
         if self.debug: print("inside generate_packets()")
         packets = []
-        with open(self.filename, "rb") as f:
+        with open(self.filename, "r") as f:
             i = 0
 
             while True:
-                data = f.read(self.maxPayloadSize).decode("utf-8")
+                data = f.read(self.maxPayloadSize)#.decode("utf-8")
+                print("Packet contents: ",data)
                 if not data:
                     break
                 if self.debug: print("data read from temp file: ",data)
@@ -107,7 +108,7 @@ class SinglePacket(Thread):
 
     def run(self):
         if self.debug: print("inside singlepacket.start()")
-        print("Transmitting a packet with sequence number: {}".format(self.packet.SequenceNumber))
+        if self.debug: print("Transmitting a packet with sequence number: {}".format(self.packet.SequenceNumber))
         self.rdt_send(self.packet)
         self.window.start(self.packet.SequenceNumber)
 
@@ -115,7 +116,7 @@ class SinglePacket(Thread):
             timeLapsed = (time.time() - self.window.start_time(self.packet.SequenceNumber))
 
             if timeLapsed > self.timeout:
-                print("Retransmitting a packet with sequence number: {}".format(self.packet.SequenceNumber))
+                if self.debug: print("Retransmitting a packet with sequence number: {}".format(self.packet.SequenceNumber))
                 self.rdt_send(self.packet)
                 self.window.restart(self.packet.SequenceNumber)
 

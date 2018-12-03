@@ -53,7 +53,7 @@ def UFTP_Server_Child(sock,server_IP,server_Port):
             jsonpayload = UFTP_DLL.Server_StringAt(UFTP_DLL.Server_FJB(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
             if debug: print(jsonpayload)
                     #call selRep send
-            UFTP_SR.SR_Sender(sock,clientIP,clientPort,jsonpayload.encode("utf-8"),debug)
+            UFTP_SR.SR_Sender(sock,clientIP,clientPort,jsonpayload,debug)
         if data.startswith("GET",0,3):
             fpath = data.split("GET ")[1]
             print("got GET for:",fpath)
@@ -79,7 +79,7 @@ def UFTP_Server_Child(sock,server_IP,server_Port):
 
 def Send_File(sock,UDP_IP,UDP_PORT,filepath):
     try:
-        with open(filepath, "rb") as f:
+        with open(filepath, "r") as f:
             pkt = f.read()
             if debug: print("pkt = " + str(pkt))
 

@@ -53,16 +53,16 @@ class SenderACKHandler(Thread):
                 #continue
 
             if not self.window.exist(receivedAck.AckNumber):
-                print("Received acknowledgement outside transmission window!!")
-                print("Discarding acknowledgement with ack number: {}".format(receivedAck.AckNumber))
+                if self.debug: print("Received acknowledgement outside transmission window!!")
+                if self.debug: print("Discarding acknowledgement with ack number: {}".format(receivedAck.AckNumber))
                 continue
 
             if self.simulate_ack_loss():
-                print("Simulating artificial acknowledgement loss!!")
-                print("Lost a acknowledgement with ack number: {}".format(receivedAck.AckNumber))
+                if self.debug: print("Simulating artificial acknowledgement loss!!")
+                if self.debug: print("Lost a acknowledgement with ack number: {}".format(receivedAck.AckNumber))
                 continue
 
-            print("Received acknowledgement with ack number: {}".format(receivedAck.AckNumber))
+            if self.debug: print("Received acknowledgement with ack number: {}".format(receivedAck.AckNumber))
             self.window.mark_acked(receivedAck.AckNumber)
 
     def parse(self, receivedAck):
@@ -80,7 +80,7 @@ class SenderACKHandler(Thread):
             return False
 
     def simulate_ack_loss(self):
-        if random.randint(1, 10) <= 2:
+        if random.randint(1, 100) <= 2:
             return True
         else:
             return False

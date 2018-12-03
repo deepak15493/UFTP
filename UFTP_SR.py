@@ -8,12 +8,8 @@ def SR_Sender(sock,receiverIP,receiverPort,payload,debug):
     fileName = 'temp.txt'
     fileTemp = os.path.join(os.getcwd(),"Data","Sender")
     file = os.path.join(os.getcwd(),fileTemp,fileName)
-    if(type(payload)!=bytes):
-        with open(file, "wb") as f:
-            f.write(payload.encode("utf-8"))
-    else:
-        with open(file, "wb") as f:
-            f.write(payload)
+    with open(file, "w") as f:
+        f.write(payload)
 
     sender = Sender(sock,debug)
 
@@ -34,8 +30,8 @@ def SR_Receiver(sock,debug):
     try:
         senderAddress = receiver.receive(fileName)
         if debug: print("filename after rcv: ",file)
-        with open(file, "rb") as f:
-            buffer += f.read().decode("utf-8")
+        with open(file, "r") as f:
+            buffer += f.read()
         if debug: print("SR_Receiver buffer: ", buffer)
         if debug: print("SR_Receiver senderAddr: ", senderAddress)
         return buffer,senderAddress

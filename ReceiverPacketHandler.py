@@ -39,7 +39,7 @@ class ReceiverPacketHandler(Thread):
                     print(".",end='',flush=True)
                     continue
                 else:
-                    if chance == 5:
+                    if chance == 2:
                         #timeout occured
                         print("Timeout!!")
                         break
@@ -65,8 +65,8 @@ class ReceiverPacketHandler(Thread):
                 #continue
 
             if self.window.out_of_order(receivedPacket.SequenceNumber):
-                #print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
-                print("Transmitting an acknowledgement with ack number: {}".format(receivedPacket.SequenceNumber))
+                if self.debug: print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
+                if self.debug: print("Transmitting an acknowledgement with ack number: {}".format(receivedPacket.SequenceNumber))
                 self.rdt_send(receivedPacket.SequenceNumber, senderAddress)
                 continue
 
@@ -80,8 +80,8 @@ class ReceiverPacketHandler(Thread):
                 #print("Discarding packet with sequence number: {}".format(receivedPacket.SequenceNumber))
                 continue
             else:
-                print("Received packet with sequence number: {}".format(receivedPacket.SequenceNumber))
-                print("Transmitting an acknowledgement with ack number: {}".format(receivedPacket.SequenceNumber))
+                if self.debug: print("Received packet with sequence number: {}".format(receivedPacket.SequenceNumber))
+                if self.debug: print("Transmitting an acknowledgement with ack number: {}".format(receivedPacket.SequenceNumber))
                 self.window.store(receivedPacket)
                 self.rdt_send(receivedPacket.SequenceNumber, senderAddress)
 
@@ -144,7 +144,7 @@ class ReceiverPacketHandler(Thread):
         return rawAck
 
     def simulate_packet_loss(self):
-        if random.randint(1, 10) <= 2:
+        if random.randint(1, 100) <= 2:
             return True
         else:
             return False
@@ -154,9 +154,9 @@ class ReceiverPacketHandler(Thread):
             packet = self.window.next()
             if packet:
                 if self.debug: print("inside deliver_packets()\ndata: ",packet.Data)
-                print("Delivered packet with sequence number: {}".format(packet.SequenceNumber))
+                if self.debug: print("Delivered packet with sequence number: {}".format(packet.SequenceNumber))
                 try:
-                    self.fileHandle.write(packet.Data.encode("utf-8"))
+                    self.fileHandle.write(packet.Data)
                 except IOError as e:
                     print("Writing to file handle failed!: ",str(e))
             else:
