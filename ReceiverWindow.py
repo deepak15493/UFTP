@@ -62,8 +62,6 @@ class ReceiverWindow(object):
 
         if len(self.receiptWindow) > 0:
             nextPkt = list(self.receiptWindow.items())[0]
-            if self.debug: print("receiverWindow.receiptwindow.items()[0] = ",nextPkt)
-            if self.debug: print("receiverWindow.receiptwindow.items()[0][1] = ",nextPkt[1])
             if nextPkt[1] != None:
                 packet = nextPkt[1]
 

@@ -9,7 +9,6 @@ from threading import Thread
 
 
 class SenderACKHandler(Thread):
-    #ACK = namedtuple("ACK", ["AckNumber", "Checksum"])
     ACK = namedtuple("ACK", ["AckNumber"])
 
     def __init__(self, senderSocket, receiverIP, receiverPort, window, debug, timeout=2, ackLossProbability=0.05, threadName="ACKHandler", bufferSize=2048):
@@ -34,10 +33,8 @@ class SenderACKHandler(Thread):
             if not ready[0]:
                 continue
 
-
             try:
                 receivedAck, receiverAddress = UFTP_Sockets.Socket_Rcv(self.senderSocket,self.bufferSize)
-                #receivedAck, receiverAddress = self.senderSocket.recvfrom(self.bufferSize)
             except Exception as e:
                 print("Receiving UDP packet failed!: " + str(e))
 
@@ -45,12 +42,6 @@ class SenderACKHandler(Thread):
                 continue
 
             receivedAck = self.parse(receivedAck)
-
-
-            #if self.corrupt(receivedAck):
-                #print("Received corrupt acknowledgement!!")
-                #print("Discarding acknowledgement with ack number: {}".format(receivedAck.AckNumber))
-                #continue
 
             if not self.window.exist(receivedAck.AckNumber):
                 if self.debug: print("Received acknowledgement outside transmission window!!")
@@ -67,8 +58,7 @@ class SenderACKHandler(Thread):
 
     def parse(self, receivedAck):
         ackNumber = struct.unpack('>I', receivedAck[:4].encode("ascii"))[0]
-        #checksum = struct.unpack('=16s', receivedAck[4:])[0]
-        ack = SenderACKHandler.ACK(AckNumber=ackNumber)#, Checksum=checksum)
+        ack = SenderACKHandler.ACK(AckNumber=ackNumber)
         return ack
 
     def corrupt(self, receivedAck):
@@ -80,7 +70,7 @@ class SenderACKHandler(Thread):
             return False
 
     def simulate_ack_loss(self):
-        if random.randint(1, 100) <= 2:
+        if random.randint(1, 100) <= 1:
             return True
         else:
             return False

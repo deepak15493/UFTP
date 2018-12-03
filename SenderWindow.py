@@ -72,8 +72,6 @@ class SenderWindow(object):
             flag=1
             while(flag==1):
                 for k, v in self.transmissionWindow.items():
-                    if self.debug: print("flag: ", flag)
-                    if self.debug: print("self.transmissionWindow items: ", k,v)
                     if v[0] == None and v[1] == True:
                         del self.transmissionWindow[k]
                         break

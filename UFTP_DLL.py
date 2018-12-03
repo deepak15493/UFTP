@@ -1,5 +1,5 @@
 from ctypes import *
-
+#API for DLL C Functions
 libUFTPC = CDLL("./ClientJSONStuff.dll")
 libUFTPS = CDLL("./ServerJSONStuff.dll")
 
