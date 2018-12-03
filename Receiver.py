@@ -4,7 +4,7 @@ from ReceiverWindow import ReceiverWindow
 from ReceiverPacketHandler import ReceiverPacketHandler
 
 class Receiver(object):
-    def __init__(self, receiverSocket, sequenceNumberBits=2, windowSize=2, path=os.path.join(os.getcwd(), "Data", "Receiver")):
+    def __init__(self, receiverSocket, debug, sequenceNumberBits=2, windowSize=2, path=os.path.join(os.getcwd(), "Data", "Receiver")):
         # self.receiverIP = receiverIP
         # self.receiverPort = receiverPort
         self.sequenceNumberBits = sequenceNumberBits
@@ -12,6 +12,7 @@ class Receiver(object):
         self.path = path
         self.fileHandle = None
         self.receiverSocket = receiverSocket
+        self.debug = debug
 
     # def open(self):
     #     try:
@@ -21,17 +22,17 @@ class Receiver(object):
     #     except Exception as e:
     #         print("Creating UDP socket {}:{} for communication with the client failed!".format(self.receiverIP, self.receiverPort))
 
-    def receive(self, filename, timeout=10):
+    def receive(self, filename, timeout=2):
         filename = os.path.join(self.path, filename)
-        print("Receiver.receive() filename: ",filename)
+        if self.debug: print("Receiver.receive() filename: ",filename)
         try:
             self.fileHandle = open(filename, "wb")
         except IOError as e:
             print("Creating a file handle failed! Filename: {}".format(filename))
 
-        window = ReceiverWindow(self.sequenceNumberBits, self.windowSize)
+        window = ReceiverWindow(self.sequenceNumberBits, self.windowSize, self.debug)
 
-        packetHandler = ReceiverPacketHandler(self.fileHandle, self.receiverSocket, window, timeout)
+        packetHandler = ReceiverPacketHandler(self.fileHandle, self.receiverSocket, window, timeout, self.debug)
         
         packetHandler.start()
 

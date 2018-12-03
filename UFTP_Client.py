@@ -11,8 +11,8 @@ debug = 0
 def UFTPC_Get_Socket():
     server_IP = input("Server IP Address: ")
     if(len(server_IP) < 1):
-        print("Using default '152.14.142.91'")
-        server_IP = "152.14.142.91"
+        server_IP = UFTP_Sockets.Socket_GetIP()
+        print("Using default '" + server_IP + "'")
     ##check to verify correct IP format
     server_Port_input = input("Server UDP Port: ")
     if(len(server_Port_input) < 1):
@@ -63,10 +63,10 @@ def UFTPC_CLI(socket_info):
 
 #continuous loop for server parent thread
 def UFTPC_Send(socket_info,msg):
-    print("In UFTPC_SEND")
+    if debug: print("In UFTPC_SEND")
     client_send_port = socket_info[0].getsockname()[1]
-    UFTP_SR.SR_Sender(socket_info[0],socket_info[1],socket_info[2],msg)
-    data,addr = UFTP_SR.SR_Receiver(socket_info[0])
+    UFTP_SR.SR_Sender(socket_info[0],socket_info[1],socket_info[2],msg,debug)
+    data,addr = UFTP_SR.SR_Receiver(socket_info[0],debug)
     if msg.startswith("GET",0,3):
         print("Received " + CLI_Class.filename + " from server")
     if debug : print("Received : " + data + " from " + addr[0] + ":" + str(addr[1]))

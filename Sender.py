@@ -5,12 +5,13 @@ from SenderPacketHandler import SenderPacketHandler
 from SenderACKHandler import SenderACKHandler
 
 class Sender(object):
-    def __init__(self, senderSocket, sequenceNumberBits=2, windowSize=2, maxSegmentSize=1500, path=os.path.join(os.getcwd(), "data", "sender")):
+    def __init__(self, senderSocket, debug, sequenceNumberBits=2, windowSize=2, maxSegmentSize=1500, path=os.path.join(os.getcwd(), "Data", "Sender")):
         self.sequenceNumberBits = sequenceNumberBits
         self.windowSize = windowSize
         self.maxSegmentSize = maxSegmentSize
         self.path = path
         self.senderSocket = senderSocket
+        self.debug = debug
 
     # def open(self):
     #     try:
@@ -21,16 +22,16 @@ class Sender(object):
     #         print("Creating UDP socket {}:{} for communication with the server failed!".format(self.senderIP, self.senderPort))
     #         raise Exception
 
-    def send(self, filename, receiverIP, receiverPort, totalPackets="ALL", timeout=10):
-        print("inside sender.send()")
+    def send(self, filename, receiverIP, receiverPort, totalPackets="ALL", timeout=2):
+        if self.debug: print("inside sender.send()")
         #print("Transmitting file '{}' to the receiver".format(filename))
         filename = os.path.join(self.path, filename)
         if not os.path.exists(filename):
             print ("File does not exist!\nFilename: {}".format(filename))
 
-        window = SenderWindow(self.sequenceNumberBits, self.windowSize)
-        packetHandler = SenderPacketHandler(filename, self.senderSocket, receiverIP, receiverPort, window, self.maxSegmentSize, totalPackets, timeout)
-        ackHandler = SenderACKHandler(self.senderSocket, receiverIP, receiverPort, window)
+        window = SenderWindow(self.sequenceNumberBits, self.windowSize,self.debug)
+        packetHandler = SenderPacketHandler(filename, self.senderSocket, receiverIP, receiverPort, window, self.maxSegmentSize, totalPackets, timeout, self.debug)
+        ackHandler = SenderACKHandler(self.senderSocket, receiverIP, receiverPort, window, self.debug)
         packetHandler.start()
         ackHandler.start()
         packetHandler.join()

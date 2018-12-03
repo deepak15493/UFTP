@@ -14,7 +14,7 @@ class ReceiverPacketHandler(Thread):
     ACK = namedtuple("ACK", ["AckNumber"])
     senderAddr = ""
 
-    def __init__(self, fileHandle, receiverSocket, window, timeout=10,
+    def __init__(self, fileHandle, receiverSocket, window, timeout, debug,
                  bufferSize=2048):
         Thread.__init__(self)
         self.fileHandle = fileHandle
@@ -26,9 +26,10 @@ class ReceiverPacketHandler(Thread):
         self.window = window
         self.timeout = timeout
         self.bufferSize = bufferSize
+        self.debug = debug
 
     def run(self):
-        print("ReceiverPacketHandler is running###")
+        if self.debug: print("ReceiverPacketHandler is running###")
         chance = 0
         while True:
             ready = select.select([self.receiverSocket], [], [], self.timeout)
@@ -49,7 +50,7 @@ class ReceiverPacketHandler(Thread):
             try:
                 receivedPacket, senderAddress = UFTP_Sockets.Socket_Rcv(self.receiverSocket,self.bufferSize)
                 self.senderAddr = senderAddress
-                print("receivedPacket: ",receivedPacket)
+                if self.debug: print("receivedPacket: ",receivedPacket)
                 #receivedPacket, senderAddress = self.receiverSocket.recvfrom(self.bufferSize)
             except Exception as e:
                 print("Receiving UDP packet failed!: ",str(e))
@@ -83,12 +84,12 @@ class ReceiverPacketHandler(Thread):
                 self.deliver_packets()
 
     def parse(self, receivedPacket):
-        print("ReceivedPacket: ",receivedPacket)
+        if self.debug: print("ReceivedPacket: ",receivedPacket)
         sequenceNumber = struct.unpack('>I',receivedPacket[:4].encode("ascii"))[0]
         data = receivedPacket[4:]
-        print("headerType: ", type(sequenceNumber))
-        print("dataType: ", type(data))
-        print("sequenceNumber: " + str(sequenceNumber) + ", data: " + data)
+        if self.debug: print("headerType: ", type(sequenceNumber))
+        if self.debug: print("dataType: ", type(data))
+        if self.debug: print("sequenceNumber: " + str(sequenceNumber) + ", data: " + data)
         #sequenceNumber = header[0:4]#struct.unpack('=I', header[0:4])[0]
         #checksum = header[4:]#struct.unpack('=H', header[4:])[0]
         #packet = ReceiverPacketHandler.PACKET(SequenceNumber=sequenceNumber, Checksum=checksum, Data=data)
@@ -103,9 +104,6 @@ class ReceiverPacketHandler(Thread):
             return False
 
     def checksum(self, data):
-        print("Data type: ",type(data))
-        print("Data len: ",len(data))
-        print("Data: ",str(data))
         if (len(data) % 2) != 0:
             data += "0"
         intermedsum = 0
@@ -119,7 +117,7 @@ class ReceiverPacketHandler(Thread):
 
     def rdt_send(self, ackNumber, senderAddress):
         ack = ReceiverPacketHandler.ACK(AckNumber=ackNumber)#, Checksum=self.get_hashcode(ackNumber))
-        print("ACK: ",ack)
+        if self.debug: print("ACK: ",ack)
         rawAck = self.make_pkt(ack)
 
         try:
@@ -150,7 +148,7 @@ class ReceiverPacketHandler(Thread):
         while True:
             packet = self.window.next()
             if packet:
-                print("inside deliver_packets()\ndata: ",packet.Data)
+                if self.debug: print("inside deliver_packets()\ndata: ",packet.Data)
                 print("Delivered packet with sequence number: {}".format(packet.SequenceNumber))
                 try:
                     self.fileHandle.write(packet.Data.encode("utf-8"))

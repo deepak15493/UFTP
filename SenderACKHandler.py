@@ -12,7 +12,7 @@ class SenderACKHandler(Thread):
     #ACK = namedtuple("ACK", ["AckNumber", "Checksum"])
     ACK = namedtuple("ACK", ["AckNumber"])
 
-    def __init__(self, senderSocket, receiverIP, receiverPort, window, timeout=10, ackLossProbability=0.05, threadName="ACKHandler", bufferSize=2048):
+    def __init__(self, senderSocket, receiverIP, receiverPort, window, debug, timeout=2, ackLossProbability=0.05, threadName="ACKHandler", bufferSize=2048):
         Thread.__init__(self)
         self.senderSocket = senderSocket
         self.receiverIP = receiverIP
@@ -22,6 +22,7 @@ class SenderACKHandler(Thread):
         self.ackLossProbability = ackLossProbability
         self.threadName = threadName
         self.bufferSize = bufferSize
+        self.debug = debug
 
     def run(self):
         while self.window.transmit():

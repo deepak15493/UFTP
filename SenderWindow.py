@@ -6,7 +6,7 @@ from threading import Lock
 LOCK = Lock()
 
 class SenderWindow(object):
-    def __init__(self, sequenceNumberBits, windowSize=None):
+    def __init__(self, sequenceNumberBits, windowSize, debug):
         self.expectedAck = 0
         self.nextSequenceNumber = 0
         self.nextPkt = 0
@@ -20,6 +20,7 @@ class SenderWindow(object):
                 self.maxWindowSize = windowSize
         self.transmissionWindow = OrderedDict()
         self.isPacketTransmission = True
+        self.debug = debug
 
     def expectedACK(self):
         return self.expectedAck
@@ -69,7 +70,7 @@ class SenderWindow(object):
 
         if key == self.expectedAck:
             flag=1
-            while(flag):
+            while(flag==1):
                 for k, v in self.transmissionWindow.items():
                     if v[0] == None and v[1] == True:
                         del self.transmissionWindow[k]

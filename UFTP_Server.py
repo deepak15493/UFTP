@@ -35,23 +35,23 @@ def UFTP_Server_Child(sock,server_IP,server_Port):
                 #clientIP = addr[0]
                 #clientPort = addr[1]
                 #call selRep receive
-                data, addr = UFTP_SR.SR_Receiver(sock)
+                data, addr = UFTP_SR.SR_Receiver(sock,debug)
                 clientIP = addr[0]
                 clientPort = addr[1]
-                print("SR code done, got: ",data)
+                if debug: print("SR code done, got: ",data)
             except UFTP_Sockets.socket.timeout:
                 print(".",end='',flush=True)
                 continue
             if addr not in addressList:
                 #new client
-                print("new client at :", addr)
+                print("New Client at :", addr)
                 addressList.append(addr)
             if data.startswith("DGET",0,4):
                 print("got DGET for:",data.split("DGET ")[1])
                 jsonpayload = UFTP_DLL.Server_StringAt(UFTP_DLL.Server_FJB(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
                 print(jsonpayload)
                 #call selRep send
-                UFTP_SR.SR_Sender(sock,clientIP,clientPort,jsonpayload.encode("utf-8"))
+                UFTP_SR.SR_Sender(sock,clientIP,clientPort,jsonpayload.encode("utf-8"),debug)
             if data.startswith("GET",0,3):
                 fpath = data.split("GET ")[1]
                 print("got GET for:",fpath)
@@ -82,7 +82,7 @@ def Send_File(sock,UDP_IP,UDP_PORT,filepath):
             if debug: print("pkt = " + str(pkt))
 
             #call selRep send
-            UFTP_SR.SR_Sender(sock,UDP_IP,UDP_PORT,pkt)
+            UFTP_SR.SR_Sender(sock,UDP_IP,UDP_PORT,pkt,debug)
             #sock.sendto(pkt,(UDP_IP,UDP_PORT))
         # while(pkt):
         #     print("3")

@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 
 class ReceiverWindow(object):
-    def __init__(self, sequenceNumberBits, windowSize=None):
+    def __init__(self, sequenceNumberBits, windowSize, debug):
         self.expectedPkt = 0
         self.maxSequenceSpace = int(math.pow(2, sequenceNumberBits))
         if windowSize is None:
@@ -16,6 +16,7 @@ class ReceiverWindow(object):
         self.lastPkt = self.maxWindowSize - 1
         self.receiptWindow = OrderedDict()
         self.isPacketReceipt = False
+        self.debug = debug
 
     def expectedPacket(self):
         return self.expectedPkt
@@ -61,8 +62,8 @@ class ReceiverWindow(object):
 
         if len(self.receiptWindow) > 0:
             nextPkt = list(self.receiptWindow.items())[0]
-            print("receiverWindow.receiptwindow.items()[0] = ",nextPkt)
-            print("receiverWindow.receiptwindow.items()[0][1] = ",nextPkt[1])
+            if self.debug: print("receiverWindow.receiptwindow.items()[0] = ",nextPkt)
+            if self.debug: print("receiverWindow.receiptwindow.items()[0][1] = ",nextPkt[1])
             if nextPkt[1] != None:
                 packet = nextPkt[1]
 
