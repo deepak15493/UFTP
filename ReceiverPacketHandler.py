@@ -35,12 +35,16 @@ class ReceiverPacketHandler(Thread):
             ready = select.select([self.receiverSocket], [], [], self.timeout)
             if not ready[0]:
                 if not self.window.receipt():
+                    #waiting for window to receive something
+                    print(".",end='',flush=True)
                     continue
                 else:
                     if chance == 5:
+                        #timeout occured
                         print("Timeout!!")
                         break
                     else:
+                        #wait for timeout
                         chance += 1
                         continue
             else:
@@ -48,6 +52,7 @@ class ReceiverPacketHandler(Thread):
                 if not self.window.receipt():
                     self.window.start_receipt()
             try:
+                print("calling UFTP_Sockets.Socket_Rcv()")
                 receivedPacket, senderAddress = UFTP_Sockets.Socket_Rcv(self.receiverSocket,self.bufferSize)
                 self.senderAddr = senderAddress
                 if self.debug: print("receivedPacket: ",receivedPacket)

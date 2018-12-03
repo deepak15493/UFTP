@@ -9,6 +9,7 @@ debug = 0
 
 #get socket info from user input
 def UFTPC_Get_Socket():
+    global debug
     server_IP = input("Server IP Address: ")
     if(len(server_IP) < 1):
         server_IP = UFTP_Sockets.Socket_GetIP()
@@ -21,7 +22,7 @@ def UFTPC_Get_Socket():
     else:
         server_Port = int(server_Port_input)
     ##check to verify correct port format
-    return (UFTP_Sockets.Initialize_Socket(),server_IP,server_Port)
+    return (UFTP_Sockets.Initialize_Socket(debug),server_IP,server_Port)
 
 #when socket has been established, use CLI to send command
 def UFTPC_CLI(socket_info):

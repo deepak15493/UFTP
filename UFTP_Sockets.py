@@ -3,7 +3,9 @@ import random
 import time
 
 debug = 0
-def Initialize_Socket():
+def Initialize_Socket(debugp):
+    global debug
+    debug = debugp
     sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     sock.setblocking(0)
     return sock
