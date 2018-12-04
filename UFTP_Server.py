@@ -37,7 +37,7 @@ def UFTP_Server_Child(sock,server_IP,server_Port):
             addressList.append(addr)
         #if server received directory get (ls) message
         if data.startswith("DGET",0,4):
-            print("got DGET for:",data.split("DGET ")[1])
+            print("got DGET for: " + data.split("DGET ")[1] + " from " + clientIP + ":" + str(clientPort))
             #get JSON representation of working directory
             jsonpayload = UFTP_DLL.Server_StringAt(UFTP_DLL.Server_FJB(data.split("DGET ")[1].encode("utf-8"),final_tree)).decode("utf-8")
             if debug: print(jsonpayload)
@@ -47,7 +47,7 @@ def UFTP_Server_Child(sock,server_IP,server_Port):
         if data.startswith("GET",0,3):
             #get absolute path for file
             fpath = data.split("GET ")[1]
-            print("got GET for:",fpath)
+            print("got GET for: " + fpath + " from " + clientIP + ":" + str(clientPort))
             #call file send API
             Send_File(sock,clientIP,clientPort,fpath)
 
