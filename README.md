@@ -1,4 +1,4 @@
-#UFTP
+(#UFTP)
 This application was created for NCSU ECE 573 Internet Protocols.  The purpose of creating it is to implement a client to server file download application utilizing the lightweight transport-layer protocol UDP instead of the overhead-heavy TCP.
 
 ##Environment Settings
