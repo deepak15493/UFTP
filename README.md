@@ -25,4 +25,4 @@ In general, on the sender or receiver side, if the debugging option is enabled, 
 After requesting a file using the get command and the subsequent download of the file, it is placed in the ./Client/ folder. The procedural generation of the directory tree can be observed as well when a directory is requested after a cd command to a directory which is empty and the debug output displays the JSON tree string payload being received from the server.
 
 ## Examples
-![alt text](https://raw.githubusercontent.com/dpatil/UFTP/master/Example.PNG)
+![alt text](Example.PNG?raw=true "Example")
